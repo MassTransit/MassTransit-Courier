@@ -14,6 +14,7 @@ namespace MassTransit.Courier.Tests
 {
     using System;
     using System.Threading;
+    using Contracts;
     using Magnum.Extensions;
     using NUnit.Framework;
     using Testing;

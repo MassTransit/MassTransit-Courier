@@ -1,12 +1,22 @@
-﻿namespace RelayHealth.MessageRouting.Tests
+﻿// Copyright 2007-2013 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+//  
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+// this file except in compliance with the License. You may obtain a copy of the 
+// License at 
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0 
+// 
+// Unless required by applicable law or agreed to in writing, software distributed
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// specific language governing permissions and limitations under the License.
+namespace MassTransit.Courier.Tests
 {
     using System;
-    using System.Collections.Generic;
     using Contracts;
     using Hosts;
-    using MassTransit;
-    using MassTransit.Testing;
     using NUnit.Framework;
+    using Testing;
 
 
     [TestFixture]
@@ -26,14 +36,14 @@
         {
             var compensateAddress = new Uri("loopback://localhost/my_compensation");
 
-            _host = new ExecuteActivityHost<TestActivity, TestArguments>(compensateAddress, 
-                _  => new TestActivity());
+            _host = new ExecuteActivityHost<TestActivity, TestArguments>(compensateAddress,
+                _ => new TestActivity());
 
             _bus = ServiceBusFactory.New(x =>
                 {
                     x.ReceiveFrom("loopback://localhost/test_queue");
 
-                    x.Subscribe(s => s.Instance(_host));
+                    SubscriptionConfiguratorExtensions.Subscribe(x, s => s.Instance(_host));
                 });
         }
 
@@ -75,9 +85,10 @@
                                                {
                                                    var compensateAddress = new Uri("loopback://localhost/mt_server");
 
-                                                   return new ExecuteActivityHost<TestActivity, TestArguments>(compensateAddress,
-                                                       _ => new TestActivity());
-
+                                                   return
+                                                       new ExecuteActivityHost<TestActivity, TestArguments>(
+                                                           compensateAddress,
+                                                           _ => new TestActivity());
                                                });
 
                                        var message = new MessageRoutingSlip(Guid.NewGuid());

@@ -14,8 +14,10 @@ namespace MassTransit.Courier.Tests
 {
     using System;
     using System.Diagnostics;
+    using System.Linq;
     using System.Threading;
     using BusConfigurators;
+    using Contracts;
     using Magnum.Extensions;
     using NUnit.Framework;
     using Subscriptions.Coordinator;
