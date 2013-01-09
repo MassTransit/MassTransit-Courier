@@ -31,9 +31,9 @@ namespace MassTransit.Courier.Tests
         [Test]
         public void Should_run_the_compensation()
         {
-            var _handled = new ManualResetEvent(false);
+            var handled = new ManualResetEvent(false);
 
-            LocalBus.SubscribeHandler<RoutingSlipFaulted>(message => { _handled.Set(); });
+            LocalBus.SubscribeHandler<RoutingSlipFaulted>(message => { handled.Set(); });
 
             Assert.IsTrue(TestCompensateBus.HasSubscription<RoutingSlipFaulted>().Any());
 
@@ -49,7 +49,7 @@ namespace MassTransit.Courier.Tests
 
             routingSlip.Execute(LocalBus);
 
-            Assert.IsTrue(_handled.WaitOne(Debugger.IsAttached ? 5.Minutes() : 30.Seconds()));
+            Assert.IsTrue(handled.WaitOne(Debugger.IsAttached ? 5.Minutes() : 30.Seconds()));
         }
 
         Uri _localUri;

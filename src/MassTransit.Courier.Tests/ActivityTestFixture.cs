@@ -72,7 +72,7 @@ namespace MassTransit.Courier.Tests
             ServiceBusFactory.ConfigureDefaultSettings(x => { x.SetEndpointCache(null); });
         }
 
-        EndpointFactoryConfiguratorImpl _endpointFactoryConfigurator;
+        readonly EndpointFactoryConfiguratorImpl _endpointFactoryConfigurator;
         EndpointCache _endpointCache;
 
         protected ActivityTestFixture()

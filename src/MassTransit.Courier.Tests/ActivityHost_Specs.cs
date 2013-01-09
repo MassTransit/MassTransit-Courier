@@ -43,7 +43,7 @@ namespace MassTransit.Courier.Tests
                 {
                     x.ReceiveFrom("loopback://localhost/test_queue");
 
-                    SubscriptionConfiguratorExtensions.Subscribe(x, s => s.Instance(_host));
+                    x.Subscribe(s => s.Instance(_host));
                 });
         }
 

@@ -15,7 +15,9 @@ namespace MassTransit.Courier.Contracts
     using System;
     using System.Collections.Generic;
 
-
+    /// <summary>
+    /// Message contract for storing activity log data
+    /// </summary>
     public interface ActivityLog
     {
         string Name { get; }

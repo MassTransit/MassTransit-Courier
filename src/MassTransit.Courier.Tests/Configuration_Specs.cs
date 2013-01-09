@@ -35,12 +35,11 @@ namespace MassTransit.Courier.Tests
                     var compensateUri = new Uri("loopback://localhost/mt_server");
                     x.ReceiveFrom(executeUri);
 
-                    x.Subscribe(
-                        s =>
-                            {
-                                s.ExecuteActivityHost<TestActivity, TestArguments>(compensateUri,
-                                    _ => new TestActivity());
-                            });
+                    x.Subscribe(s =>
+                        {
+                            s.ExecuteActivityHost<TestActivity, TestArguments>(compensateUri,
+                                _ => new TestActivity());
+                        });
                 });
         }
 

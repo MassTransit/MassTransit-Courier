@@ -41,7 +41,7 @@ namespace MassTransit.Courier.Tests
         }
 
         IServiceBus _bus;
-        ManualResetEvent _received = new ManualResetEvent(false);
+        readonly ManualResetEvent _received = new ManualResetEvent(false);
 
         [TestFixtureSetUp]
         public void Setup()
@@ -50,8 +50,7 @@ namespace MassTransit.Courier.Tests
                 {
                     x.ReceiveFrom("loopback://localhost/test_queue");
 
-                    SubscriptionConfiguratorExtensions.Subscribe(x,
-                        s => HandlerSubscriptionExtensions.Handler<RoutingSlip>(s, message => _received.Set()));
+                    x.Subscribe(s => s.Handler<RoutingSlip>(message => _received.Set()));
                 });
         }
 
