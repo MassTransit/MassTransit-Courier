@@ -21,6 +21,11 @@ namespace MassTransit.Courier
         TLog Log { get; }
 
         /// <summary>
+        /// The tracking number for this routing slip
+        /// </summary>
+        Guid TrackingNumber { get; }
+
+        /// <summary>
         /// The compensation was successful
         /// </summary>
         /// <returns></returns>

@@ -44,6 +44,11 @@ namespace MassTransit.Courier.Hosts
 
         public TLog Log { get; private set; }
 
+        public Guid TrackingNumber
+        {
+            get { return _routingSlip.TrackingNumber; }
+        }
+
         public CompensationResult Compensated()
         {
             var builder = new RoutingSlipBuilder(_routingSlip.TrackingNumber, _routingSlip.Itinerary,

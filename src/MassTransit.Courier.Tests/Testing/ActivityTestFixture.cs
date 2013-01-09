@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2013 Chris Patterson
+// Copyright 2007-2013 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -10,13 +10,17 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Courier.Tests
+namespace MassTransit.Courier.Tests.Testing
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using BusConfigurators;
     using Configurators;
     using EndpointConfigurators;
     using Magnum.Extensions;
     using MassTransit.Exceptions;
+    using MassTransit.Testing;
     using NUnit.Framework;
     using Saga;
     using Transports;
@@ -25,6 +29,31 @@ namespace MassTransit.Courier.Tests
     [TestFixture]
     public abstract class ActivityTestFixture
     {
+        readonly EndpointFactoryConfiguratorImpl _endpointFactoryConfigurator;
+        EndpointCache _endpointCache;
+
+        protected ActivityTestFixture()
+            : this(new Uri("loopback://localhost"))
+        {
+        }
+
+        protected ActivityTestFixture(Uri baseUri)
+        {
+            BaseUri = baseUri;
+
+            var defaultSettings = new EndpointFactoryDefaultSettings();
+
+            _endpointFactoryConfigurator = new EndpointFactoryConfiguratorImpl(defaultSettings);
+            _endpointFactoryConfigurator.SetPurgeOnStartup(true);
+
+            ActivityTestContexts = new Dictionary<Type, ActivityTestContext>();
+        }
+
+        protected Uri BaseUri { get; private set; }
+        protected IDictionary<Type, ActivityTestContext> ActivityTestContexts { get; private set; }
+        protected IEndpointFactory EndpointFactory { get; private set; }
+        protected IEndpointCache EndpointCache { get; set; }
+
         [TestFixtureSetUp]
         public void ActivityTextFixtureSetup()
         {
@@ -36,7 +65,6 @@ namespace MassTransit.Courier.Tests
                 try
                 {
                     EndpointFactory = _endpointFactoryConfigurator.CreateEndpointFactory();
-                    //	_endpointFactoryConfigurator = null;
 
                     _endpointCache = new EndpointCache(EndpointFactory);
 
@@ -61,6 +89,9 @@ namespace MassTransit.Courier.Tests
         [TestFixtureTearDown]
         public void ActivityTestFixtureFixtureTeardown()
         {
+            foreach (ActivityTestContext activityTestContext in ActivityTestContexts.Values)
+                activityTestContext.Dispose();
+
             _endpointCache.Clear();
 
             if (EndpointCache != null)
@@ -72,25 +103,44 @@ namespace MassTransit.Courier.Tests
             ServiceBusFactory.ConfigureDefaultSettings(x => { x.SetEndpointCache(null); });
         }
 
-        readonly EndpointFactoryConfiguratorImpl _endpointFactoryConfigurator;
-        EndpointCache _endpointCache;
-
-        protected ActivityTestFixture()
-        {
-            var defaultSettings = new EndpointFactoryDefaultSettings();
-
-            _endpointFactoryConfigurator = new EndpointFactoryConfiguratorImpl(defaultSettings);
-            _endpointFactoryConfigurator.SetPurgeOnStartup(true);
-        }
-
         protected void AddTransport<T>()
             where T : class, ITransportFactory, new()
         {
             _endpointFactoryConfigurator.AddTransportFactory<T>();
         }
 
-        protected IEndpointFactory EndpointFactory { get; private set; }
-        protected IEndpointCache EndpointCache { get; set; }
+        protected void AddActivityContext<T, TArguments, TLog>(Func<T> activityFactory)
+            where TArguments : class
+            where TLog : class
+            where T : Activity<TArguments, TLog>
+        {
+            var context = new ActivityTestContext<T, TArguments, TLog>(BaseUri, activityFactory);
+
+            ActivityTestContexts.Add(typeof(T), context);
+        }
+
+        protected virtual IServiceBus CreateServiceBus(Action<ServiceBusConfigurator> configurator)
+        {
+            return ServiceBusFactory.New(x =>
+                {
+                    configurator(x);
+
+                    foreach (ActivityTestContext activityTestContext in ActivityTestContexts.Values)
+                        activityTestContext.ConfigureServiceBus(x);
+                });
+        }
+
+        protected virtual bool WaitForSubscription<T>()
+            where T : class
+        {
+            return ActivityTestContexts.Values.All(x => ScenarioAssertionExtensions.HasSubscription<T>(x.ExecuteBus).Any()
+                                                 && x.CompensateBus.HasSubscription<T>().Any());
+        }
+
+        protected ActivityTestContext GetActivityContext<T>()
+        {
+            return ActivityTestContexts[typeof(T)];
+        }
 
         protected void ConfigureEndpointFactory(Action<EndpointFactoryConfigurator> configure)
         {

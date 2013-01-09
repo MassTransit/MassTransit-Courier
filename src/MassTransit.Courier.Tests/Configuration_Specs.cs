@@ -14,6 +14,7 @@ namespace MassTransit.Courier.Tests
 {
     using System;
     using NUnit.Framework;
+    using Testing;
 
 
     [TestFixture]

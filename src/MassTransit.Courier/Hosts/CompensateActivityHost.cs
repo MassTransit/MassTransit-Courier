@@ -16,6 +16,7 @@ namespace MassTransit.Courier.Hosts
     using System.Collections.Generic;
     using System.Linq;
     using Contracts;
+    using Logging;
     using Magnum.Reflection;
 
 
@@ -25,6 +26,7 @@ namespace MassTransit.Courier.Hosts
         where TLog : class
     {
         readonly Func<TLog, TController> _controllerFactory;
+        readonly ILog _log = Logger.Get<CompensateActivityHost<TController, TLog>>();
 
         public CompensateActivityHost(Func<TLog, TController> controllerFactory)
         {
@@ -34,6 +36,9 @@ namespace MassTransit.Courier.Hosts
         public void Consume(IConsumeContext<RoutingSlip> context)
         {
             var compensation = new HostCompensation<TLog>(context);
+
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Host: {0} Executing: {1}", context.Bus.Endpoint.Address, compensation.TrackingNumber);
 
             try
             {

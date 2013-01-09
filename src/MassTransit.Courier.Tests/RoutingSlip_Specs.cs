@@ -16,8 +16,8 @@ namespace MassTransit.Courier.Tests
     using System.Threading;
     using Contracts;
     using Magnum.Extensions;
+    using MassTransit.Testing;
     using NUnit.Framework;
-    using Testing;
 
 
     [TestFixture]

@@ -12,14 +12,9 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Courier.Tests
 {
-    using System;
-    using System.Diagnostics;
-    using System.IO;
     using Log4NetIntegration.Logging;
-    using Logging;
     using NUnit.Framework;
     using log4net;
-    using log4net.Config;
 
 
     [SetUpFixture]
@@ -28,15 +23,7 @@ namespace MassTransit.Courier.Tests
         [SetUp]
         public void Before_any()
         {
-            string path = AppDomain.CurrentDomain.BaseDirectory;
-
-            string file = Path.Combine(path, "masstransit.courier.tests.log4net.xml");
-
-            XmlConfigurator.Configure(new FileInfo(file));
-
-            Trace.WriteLine("Loading Log4net: " + file);
-
-            Logger.UseLogger(new Log4NetLogger());
+            Log4NetLogger.Use("masstransit.courier.tests.log4net.xml");
         }
 
         [TearDown]

@@ -15,6 +15,7 @@ namespace MassTransit.Courier.Tests
     using System;
     using Contracts;
     using Hosts;
+    using MassTransit.Testing;
     using NUnit.Framework;
     using Testing;
 

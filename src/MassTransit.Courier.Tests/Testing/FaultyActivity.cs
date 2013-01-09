@@ -10,38 +10,25 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Courier.Tests
+namespace MassTransit.Courier.Tests.Testing
 {
     using System;
 
 
-    public class TestActivity :
-        Activity<TestArguments, TestLog>
+    public class FaultyActivity :
+        Activity<FaultyArguments, FaultyLog>
     {
-        public ExecutionResult Execute(Execution<TestArguments> execution)
+        public ExecutionResult Execute(Execution<FaultyArguments> execution)
         {
-            TestLog log = new TestLogImpl(execution.Arguments.Value);
+            Console.WriteLine("FaultyActivity: Execute");
+            Console.WriteLine("FaultyActivity: About to blow this up!");
 
-            return execution.Completed(log);
+            return execution.Faulted(new InvalidOperationException("Things that make you go boom!"));
         }
 
-        public CompensationResult Compensate(Compensation<TestLog> compensation)
+        public CompensationResult Compensate(Compensation<FaultyLog> compensation)
         {
-            Console.WriteLine("Compensating Value: {0}", compensation.Log.Value);
-
             return compensation.Compensated();
-        }
-
-
-        class TestLogImpl :
-            TestLog
-        {
-            public TestLogImpl(string value)
-            {
-                Value = value;
-            }
-
-            public string Value { get; private set; }
         }
     }
 }

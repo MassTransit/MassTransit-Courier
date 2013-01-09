@@ -14,6 +14,7 @@ namespace MassTransit.Courier.Hosts
 {
     using System;
     using Contracts;
+    using Logging;
 
 
     public class ExecuteActivityHost<TController, TArguments> :
@@ -23,6 +24,7 @@ namespace MassTransit.Courier.Hosts
     {
         readonly Uri _compensateAddress;
         readonly Func<TArguments, TController> _controllerFactory;
+        readonly ILog _log = Logger.Get<ExecuteActivityHost<TController, TArguments>>();
 
         public ExecuteActivityHost(Uri compensateAddress, Func<TArguments, TController> controllerFactory)
         {
@@ -38,6 +40,9 @@ namespace MassTransit.Courier.Hosts
         public void Consume(IConsumeContext<RoutingSlip> context)
         {
             var execution = new HostExecution<TArguments>(context, _compensateAddress);
+
+            if (_log.IsDebugEnabled)
+                _log.DebugFormat("Host: {0} Executing: {1}", context.Bus.Endpoint.Address, execution.TrackingNumber);
 
             try
             {

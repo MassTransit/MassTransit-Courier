@@ -20,6 +20,10 @@ namespace MassTransit.Courier
     {
         TArguments Arguments { get; }
 
+        /// <summary>
+        /// The tracking number for this routing slip
+        /// </summary>
+        Guid TrackingNumber { get; }
 
         /// <summary>
         /// Completes the execution, without passing a compensating log entry

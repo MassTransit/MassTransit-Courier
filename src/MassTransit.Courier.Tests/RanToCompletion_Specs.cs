@@ -23,30 +23,25 @@ namespace MassTransit.Courier.Tests
 
 
     [TestFixture]
-    public class When_an_activity_faults :
+    public class When_an_activity_runs_to_completion :
         ActivityTestFixture
     {
         [Test]
-        public void Should_run_the_compensation()
+        public void Should_publish_the_completed_event()
         {
             var handled = new ManualResetEvent(false);
 
-            LocalBus.SubscribeHandler<RoutingSlipFaulted>(message => { handled.Set(); });
+            LocalBus.SubscribeHandler<RoutingSlipCompleted>(message => { handled.Set(); });
 
-            Assert.IsTrue(WaitForSubscription<RoutingSlipFaulted>());
+            Assert.IsTrue(WaitForSubscription<RoutingSlipCompleted>());
 
             ActivityTestContext testActivity = GetActivityContext<TestActivity>();
-            ActivityTestContext faultActivity = GetActivityContext<FaultyActivity>();
 
             var builder = new RoutingSlipBuilder(Guid.NewGuid());
             builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new
                 {
                     Value = "Hello",
                 });
-            builder.AddActivity(faultActivity.Name, faultActivity.ExecuteUri, new
-                {
-                });
-
             LocalBus.Execute(builder.Build());
 
             Assert.IsTrue(handled.WaitOne(Debugger.IsAttached ? 5.Minutes() : 30.Seconds()));
@@ -61,7 +56,6 @@ namespace MassTransit.Courier.Tests
             _localUri = new Uri(BaseUri, "local");
 
             AddActivityContext<TestActivity, TestArguments, TestLog>(() => new TestActivity());
-            AddActivityContext<FaultyActivity, FaultyArguments, FaultyLog>(() => new FaultyActivity());
 
             LocalBus = CreateServiceBus(ConfigureLocalBus);
         }

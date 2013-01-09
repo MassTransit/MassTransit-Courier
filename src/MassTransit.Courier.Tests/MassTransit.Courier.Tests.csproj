@@ -58,18 +58,20 @@
       <Link>SolutionVersion.cs</Link>
     </Compile>
     <Compile Include="ActivityHost_Specs.cs" />
-    <Compile Include="ActivityTestFixture.cs" />
     <Compile Include="Configuration_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
+    <Compile Include="RanToCompletion_Specs.cs" />
     <Compile Include="EndpointCacheProxy.cs" />
-    <Compile Include="FaultyActivity.cs" />
-    <Compile Include="FaultyArguments.cs" />
-    <Compile Include="FaultyLog.cs" />
+    <Compile Include="Testing\FaultyActivity.cs" />
+    <Compile Include="Testing\FaultyArguments.cs" />
+    <Compile Include="Testing\FaultyLog.cs" />
     <Compile Include="Fault_Specs.cs" />
     <Compile Include="RoutingSlip_Specs.cs" />
-    <Compile Include="TestActivity.cs" />
-    <Compile Include="TestArguments.cs" />
-    <Compile Include="TestLog.cs" />
+    <Compile Include="Testing\TestActivity.cs" />
+    <Compile Include="Testing\TestArguments.cs" />
+    <Compile Include="Testing\ActivityTestContext.cs" />
+    <Compile Include="Testing\ActivityTestFixture.cs" />
+    <Compile Include="Testing\TestLog.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MassTransit.Courier\MassTransit.Courier.csproj">

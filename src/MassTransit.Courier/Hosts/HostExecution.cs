@@ -47,6 +47,11 @@ namespace MassTransit.Courier.Hosts
 
         public TArguments Arguments { get; private set; }
 
+        public Guid TrackingNumber
+        {
+            get { return _routingSlip.TrackingNumber; }
+        }
+
         public ExecutionResult Completed()
         {
             var builder = new RoutingSlipBuilder(_routingSlip.TrackingNumber,
@@ -104,7 +109,7 @@ namespace MassTransit.Courier.Hosts
                 return new RanToCompletionResult();
             }
 
-            IEndpoint endpoint = _context.Bus.GetEndpoint(_routingSlip.GetNextExecuteAddress());
+            IEndpoint endpoint = _context.Bus.GetEndpoint(routingSlip.GetNextExecuteAddress());
 
             endpoint.Forward(_context, routingSlip);
 
