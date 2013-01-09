@@ -66,8 +66,9 @@
     <Compile Include="Hosts\ExecuteActivityHost.cs" />
     <Compile Include="Hosts\HostCompensation.cs" />
     <Compile Include="Hosts\HostExecution.cs" />
+    <Compile Include="Hosts\RoutingSlipImpl.cs" />
     <Compile Include="Hosts\SanitizedRoutingSlip.cs" />
-    <Compile Include="MessageRoutingSlip.cs" />
+    <Compile Include="RoutingSlipBuilder.cs" />
     <Compile Include="RoutingSlipExtensions.cs" />
   </ItemGroup>
   <ItemGroup>

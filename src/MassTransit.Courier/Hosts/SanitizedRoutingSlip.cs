@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2013 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2013 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -15,6 +15,7 @@ namespace MassTransit.Courier.Hosts
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Runtime.Serialization;
     using Contracts;
 
 
@@ -24,10 +25,10 @@ namespace MassTransit.Courier.Hosts
         public SanitizedRoutingSlip(RoutingSlip routingSlip)
         {
             TrackingNumber = routingSlip.TrackingNumber;
-            if (routingSlip.Activities == null)
-                Activities = new List<Activity>();
+            if (routingSlip.Itinerary == null)
+                Itinerary = new List<Activity>();
             else
-                Activities = routingSlip.Activities.Select(x => (Activity)new SanitizedActivity(x)).ToList();
+                Itinerary = routingSlip.Itinerary.Select(x => (Activity)new SanitizedActivity(x)).ToList();
 
             if (routingSlip.ActivityLogs == null)
                 ActivityLogs = new List<ActivityLog>();
@@ -38,7 +39,7 @@ namespace MassTransit.Courier.Hosts
         }
 
         public Guid TrackingNumber { get; private set; }
-        public IList<Activity> Activities { get; private set; }
+        public IList<Activity> Itinerary { get; private set; }
         public IList<ActivityLog> ActivityLogs { get; private set; }
         public IDictionary<string, string> Variables { get; private set; }
 
@@ -48,6 +49,11 @@ namespace MassTransit.Courier.Hosts
         {
             public SanitizedActivity(Activity activity)
             {
+                if (string.IsNullOrEmpty(activity.Name))
+                    throw new SerializationException("An Activity Name is required");
+                if (activity.ExecuteAddress == null)
+                    throw new SerializationException("An Activity ExecuteAddress is required");
+
                 Name = activity.Name;
                 ExecuteAddress = activity.ExecuteAddress;
                 Arguments = activity.Arguments ?? new Dictionary<string, string>();
@@ -64,6 +70,11 @@ namespace MassTransit.Courier.Hosts
         {
             public SanitizedActivityLog(ActivityLog activityLog)
             {
+                if (string.IsNullOrEmpty(activityLog.Name))
+                    throw new SerializationException("An ActivityLog Name is required");
+                if (activityLog.CompensateAddress == null)
+                    throw new SerializationException("An ActivityLog CompensateAddress is required");
+
                 Name = activityLog.Name;
                 CompensateAddress = activityLog.CompensateAddress;
                 Results = activityLog.Results ?? new Dictionary<string, string>();

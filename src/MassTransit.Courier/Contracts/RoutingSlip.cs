@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2013 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2013 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -31,7 +31,7 @@ namespace MassTransit.Courier.Contracts
         /// <summary>
         /// The list of activities that are remaining
         /// </summary>
-        IList<Activity> Activities { get; }
+        IList<Activity> Itinerary { get; }
 
         /// <summary>
         /// The logs of activities that have already been executed

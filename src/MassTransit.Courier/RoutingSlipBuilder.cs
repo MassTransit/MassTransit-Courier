@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2013 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2013 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -16,46 +16,59 @@ namespace MassTransit.Courier
     using System.Collections.Generic;
     using System.Linq;
     using Contracts;
+    using Hosts;
     using Magnum.Reflection;
 
 
-    public class MessageRoutingSlip :
-        RoutingSlip
+    public class RoutingSlipBuilder
     {
-        public MessageRoutingSlip(Guid trackingNumber)
+        IList<ActivityLog> _activityLogs;
+        IList<Activity> _itinerary;
+        Guid _trackingNumber;
+        IDictionary<string, string> _variables;
+
+        public RoutingSlipBuilder(Guid trackingNumber)
         {
-            TrackingNumber = trackingNumber;
-            Activities = new List<Activity>();
-            ActivityLogs = new List<ActivityLog>();
-            Variables = new Dictionary<string, string>();
+            _trackingNumber = trackingNumber;
+            _itinerary = new List<Activity>();
+            _activityLogs = new List<ActivityLog>();
+            _variables = new Dictionary<string, string>();
         }
 
-        public MessageRoutingSlip(Guid trackingNumber, IEnumerable<Activity> activities,
-            IEnumerable<ActivityLog> activityLogs,
-            IDictionary<string, string> variables)
+        public RoutingSlipBuilder(Guid trackingNumber, IEnumerable<Activity> activities,
+            IEnumerable<ActivityLog> activityLogs, IDictionary<string, string> variables)
         {
-            TrackingNumber = trackingNumber;
-            Activities = activities.ToList();
-            ActivityLogs = activityLogs.ToList();
-            Variables = variables ?? new Dictionary<string, string>();
+            _trackingNumber = trackingNumber;
+            _itinerary = activities.ToList();
+            _activityLogs = activityLogs.ToList();
+            _variables = variables ?? new Dictionary<string, string>();
         }
 
+        public Guid TrackingNumber
+        {
+            get { return _trackingNumber; }
+        }
 
-        public Guid TrackingNumber { get; private set; }
-        public IList<Activity> Activities { get; private set; }
-        public IList<ActivityLog> ActivityLogs { get; private set; }
-        public IDictionary<string, string> Variables { get; private set; }
+        public RoutingSlip Build()
+        {
+            return new RoutingSlipImpl(TrackingNumber, _itinerary, _activityLogs, _variables);
+        }
 
         public void AddActivity(string name, Uri executeAddress, object arguments)
         {
             Activity activity = new ActivityImpl(name, executeAddress, GetObjectAsDictionary(arguments));
-            Activities.Add(activity);
+            _itinerary.Add(activity);
         }
 
         public void AddActivityLog(string name, Uri compensateAddress, object results)
         {
             ActivityLog activity = new ActivityLogImpl(name, compensateAddress, GetObjectAsDictionary(results));
-            ActivityLogs.Add(activity);
+            _activityLogs.Add(activity);
+        }
+
+        public void AddVariable(string key, string value)
+        {
+            _variables.Add(key, value);
         }
 
         IDictionary<string, string> GetObjectAsDictionary(object values)

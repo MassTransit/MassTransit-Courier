@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2013 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2013 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -26,7 +26,7 @@ namespace MassTransit.Courier
         /// <returns></returns>
         public static bool RanToCompletion(this RoutingSlip routingSlip)
         {
-            return routingSlip.Activities == null || routingSlip.Activities.Count == 0;
+            return routingSlip.Itinerary == null || routingSlip.Itinerary.Count == 0;
         }
 
         /// <summary>
@@ -42,7 +42,7 @@ namespace MassTransit.Courier
 
         public static Uri GetNextExecuteAddress(this RoutingSlip routingSlip)
         {
-            Activity activity = routingSlip.Activities.First();
+            Activity activity = routingSlip.Itinerary.First();
 
             return activity.ExecuteAddress;
         }
@@ -54,7 +54,7 @@ namespace MassTransit.Courier
             return activity.CompensateAddress;
         }
 
-        public static void Execute(this RoutingSlip routingSlip, IServiceBus bus)
+        public static void Execute(this IServiceBus bus, RoutingSlip routingSlip)
         {
             if (routingSlip.RanToCompletion())
             {

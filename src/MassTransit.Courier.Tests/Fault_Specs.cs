@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2013 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2013 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -37,17 +37,16 @@ namespace MassTransit.Courier.Tests
 
             Assert.IsTrue(TestCompensateBus.HasSubscription<RoutingSlipFaulted>().Any());
 
-            var routingSlip = new MessageRoutingSlip(Guid.NewGuid());
-            routingSlip.AddActivity("test", _testExecuteUri, new
+            var builder = new RoutingSlipBuilder(Guid.NewGuid());
+            builder.AddActivity("test", _testExecuteUri, new
                 {
                     Value = "Hello",
                 });
-            routingSlip.AddActivity("fault", _faultExecuteUri, new
+            builder.AddActivity("fault", _faultExecuteUri, new
                 {
                 });
 
-
-            routingSlip.Execute(LocalBus);
+            LocalBus.Execute(builder.Build());
 
             Assert.IsTrue(handled.WaitOne(Debugger.IsAttached ? 5.Minutes() : 30.Seconds()));
         }

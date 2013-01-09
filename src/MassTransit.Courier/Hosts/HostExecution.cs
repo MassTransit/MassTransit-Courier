@@ -1,4 +1,4 @@
-// Copyright 2007-2013 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2013 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -35,35 +35,35 @@ namespace MassTransit.Courier.Hosts
         {
             _context = context;
             _compensationAddress = compensationAddress;
-            _routingSlip = Sanitize(context.Message);
 
-            if (_routingSlip.Activities.Count == 0)
+            _routingSlip = Sanitize(context.Message);
+            if (_routingSlip.Itinerary.Count == 0)
                 throw new ArgumentException("The routingSlip must contain at least one activity");
 
-            _activity = _routingSlip.Activities[0];
+            _activity = _routingSlip.Itinerary[0];
 
-            Arguments = GetActivityArguments(_activity);
+            Arguments = GetActivityArguments(_activity, _routingSlip.Variables);
         }
 
         public TArguments Arguments { get; private set; }
 
         public ExecutionResult Completed()
         {
-            var routingSlip = new MessageRoutingSlip(_routingSlip.TrackingNumber,
-                _routingSlip.Activities.Skip(1), _routingSlip.ActivityLogs, _routingSlip.Variables);
+            var builder = new RoutingSlipBuilder(_routingSlip.TrackingNumber,
+                _routingSlip.Itinerary.Skip(1), _routingSlip.ActivityLogs, _routingSlip.Variables);
 
-            return Complete(routingSlip);
+            return Complete(builder.Build());
         }
 
         public ExecutionResult Completed<TLog>(TLog log)
             where TLog : class
         {
-            var routingSlip = new MessageRoutingSlip(_routingSlip.TrackingNumber,
-                _routingSlip.Activities.Skip(1), _routingSlip.ActivityLogs, _routingSlip.Variables);
+            var builder = new RoutingSlipBuilder(_routingSlip.TrackingNumber,
+                _routingSlip.Itinerary.Skip(1), _routingSlip.ActivityLogs, _routingSlip.Variables);
 
-            routingSlip.AddActivityLog(_activity.Name, _compensationAddress, log);
+            builder.AddActivityLog(_activity.Name, _compensationAddress, log);
 
-            return Complete(routingSlip);
+            return Complete(builder.Build());
         }
 
         public ExecutionResult Faulted()
@@ -116,10 +116,11 @@ namespace MassTransit.Courier.Hosts
             return new SanitizedRoutingSlip(message);
         }
 
-        static TArguments GetActivityArguments(Activity activity)
+        static TArguments GetActivityArguments(Activity activity, IEnumerable<KeyValuePair<string, string>> variables)
         {
-            IDictionary<string, string> argumentDictionary = activity.Arguments ?? new Dictionary<string, string>();
-            IDictionary<string, object> initializer = argumentDictionary.ToDictionary(x => x.Key, x => (object)x.Value);
+            IDictionary<string, object> initializer = variables.ToDictionary(x => x.Key, x => (object)x.Value);
+            foreach (var argument in activity.Arguments)
+                initializer[argument.Key] = argument.Value;
 
             return InterfaceImplementationExtensions.InitializeProxy<TArguments>(initializer);
         }

@@ -1,4 +1,4 @@
-// Copyright 2007-2013 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+// Copyright 2007-2013 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -25,25 +25,31 @@ namespace MassTransit.Courier.Hosts
         Compensation<TLog>
         where TLog : class
     {
+        readonly ActivityLog _activityLog;
         readonly IConsumeContext<RoutingSlip> _context;
         readonly RoutingSlip _routingSlip;
 
         public HostCompensation(IConsumeContext<RoutingSlip> context)
         {
             _context = context;
-            _routingSlip = Sanitize(context.Message);
 
-            Log = GetActivityLog(_routingSlip);
+            _routingSlip = Sanitize(context.Message);
+            if (_routingSlip.ActivityLogs.Count == 0)
+                throw new ArgumentException("The routingSlip must contain at least one activity log");
+
+            _activityLog = _routingSlip.ActivityLogs.Last();
+
+            Log = GetActivityLog(_activityLog, _routingSlip.Variables);
         }
 
         public TLog Log { get; private set; }
 
         public CompensationResult Compensated()
         {
-            var routingSlip = new MessageRoutingSlip(_routingSlip.TrackingNumber, _routingSlip.Activities,
+            var builder = new RoutingSlipBuilder(_routingSlip.TrackingNumber, _routingSlip.Itinerary,
                 _routingSlip.ActivityLogs.SkipLast(), _routingSlip.Variables);
 
-            return Compensated(routingSlip);
+            return Compensated(builder.Build());
         }
 
         public CompensationResult Failed()
@@ -83,12 +89,11 @@ namespace MassTransit.Courier.Hosts
             return new SanitizedRoutingSlip(message);
         }
 
-        static TLog GetActivityLog(RoutingSlip routingSlip)
+        static TLog GetActivityLog(ActivityLog activityLog, IEnumerable<KeyValuePair<string, string>> variables)
         {
-            ActivityLog activityLog = routingSlip.ActivityLogs.Last();
-
-            IDictionary<string, string> argumentDictionary = activityLog.Results ?? new Dictionary<string, string>();
-            IDictionary<string, object> initializer = argumentDictionary.ToDictionary(x => x.Key, x => (object)x.Value);
+            IDictionary<string, object> initializer = variables.ToDictionary(x => x.Key, x => (object)x.Value);
+            foreach (var argument in activityLog.Results)
+                initializer[argument.Key] = argument.Value;
 
             return InterfaceImplementationExtensions.InitializeProxy<TLog>(initializer);
         }

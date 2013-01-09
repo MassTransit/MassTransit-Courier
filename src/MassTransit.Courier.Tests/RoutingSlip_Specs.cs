@@ -1,4 +1,4 @@
-﻿// Copyright 2007-2013 Chris Patterson, Dru Sellers, Travis Smith, et. al.
+﻿// Copyright 2007-2013 Chris Patterson
 //  
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 // this file except in compliance with the License. You may obtain a copy of the 
@@ -26,10 +26,10 @@ namespace MassTransit.Courier.Tests
         [Test]
         public void Should_be_properly_serialized_as_a_message()
         {
-            var message = new MessageRoutingSlip(Guid.NewGuid());
-            message.AddActivity("test", new Uri("loopback://localhost/mt_client"), new {});
+            var builder = new RoutingSlipBuilder(Guid.NewGuid());
+            builder.AddActivity("test", new Uri("loopback://localhost/mt_client"), new {});
 
-            _bus.Publish<RoutingSlip>(message);
+            _bus.Publish(builder.Build());
 
             Assert.IsTrue(_received.WaitOne(8.Seconds()));
         }
