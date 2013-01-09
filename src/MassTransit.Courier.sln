@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Courier", "MassTransit.Courier\MassTransit.Courier.csproj", "{F949D7CF-A0BD-4915-B170-446D2D07B0F4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Courier.Tests", "MassTransit.Courier.Tests\MassTransit.Courier.Tests.csproj", "{A8251DE0-A8AD-4EB9-A37D-BFD0CFA0A5CF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{EE19D8DA-711E-4881-AE51-29AAE14EC19D}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+		.nuget\packages.config = .nuget\packages.config
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F949D7CF-A0BD-4915-B170-446D2D07B0F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F949D7CF-A0BD-4915-B170-446D2D07B0F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F949D7CF-A0BD-4915-B170-446D2D07B0F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F949D7CF-A0BD-4915-B170-446D2D07B0F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8251DE0-A8AD-4EB9-A37D-BFD0CFA0A5CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8251DE0-A8AD-4EB9-A37D-BFD0CFA0A5CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8251DE0-A8AD-4EB9-A37D-BFD0CFA0A5CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8251DE0-A8AD-4EB9-A37D-BFD0CFA0A5CF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
