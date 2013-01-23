@@ -16,8 +16,8 @@ namespace MassTransit.Courier.Hosts
     using System.Collections.Generic;
     using System.Linq;
     using Contracts;
-    using Exceptions;
     using Extensions;
+    using InternalMessages;
     using Magnum.Reflection;
 
 
@@ -64,12 +64,18 @@ namespace MassTransit.Courier.Hosts
 
         public CompensationResult Failed(Exception exception)
         {
+            var message = new CompensationFailedMessage(_routingSlip.TrackingNumber, _activityLog.Name, exception);
+            _context.Bus.Publish(message);
+
             // the exception is thrown so MT will move the routing slip into the error queue
             throw exception;
         }
 
         CompensationResult Compensated(RoutingSlip routingSlip)
         {
+            _context.Bus.Publish(new RoutingSlipActivityCompensatedMessage(_routingSlip.TrackingNumber,
+                _activityLog.Name));
+
             if (routingSlip.IsRunning())
             {
                 IEndpoint endpoint = _context.Bus.GetEndpoint(routingSlip.GetLastCompensateAddress());
@@ -79,11 +85,7 @@ namespace MassTransit.Courier.Hosts
                 return new CompensatedResult();
             }
 
-            _context.Bus.Publish<RoutingSlipFaulted>(new
-                {
-                    routingSlip.TrackingNumber,
-                    Timestamp = DateTime.UtcNow,
-                });
+            _context.Bus.Publish(new RoutingSlipFaultedMessage(routingSlip.TrackingNumber));
 
             return new FaultedResult();
         }
@@ -97,7 +99,7 @@ namespace MassTransit.Courier.Hosts
         static TLog GetActivityLog(ActivityLog activityLog, IEnumerable<KeyValuePair<string, string>> variables)
         {
             IDictionary<string, object> initializer = variables.ToDictionary(x => x.Key, x => (object)x.Value);
-            foreach (var argument in activityLog.Results)
+            foreach (var argument in activityLog.Results.Where(x => !string.IsNullOrWhiteSpace(x.Value)))
                 initializer[argument.Key] = argument.Value;
 
             return InterfaceImplementationExtensions.InitializeProxy<TLog>(initializer);

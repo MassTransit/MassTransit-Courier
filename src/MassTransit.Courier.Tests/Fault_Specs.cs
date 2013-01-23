@@ -36,12 +36,17 @@ namespace MassTransit.Courier.Tests
             Assert.IsTrue(WaitForSubscription<RoutingSlipFaulted>());
 
             ActivityTestContext testActivity = GetActivityContext<TestActivity>();
+            ActivityTestContext secondTestActivity = GetActivityContext<SecondTestActivity>();
             ActivityTestContext faultActivity = GetActivityContext<FaultyActivity>();
 
             var builder = new RoutingSlipBuilder(Guid.NewGuid());
             builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new
                 {
                     Value = "Hello",
+                });
+            builder.AddActivity(secondTestActivity.Name, secondTestActivity.ExecuteUri, new
+                {
+                    Value = "Hello Again!",
                 });
             builder.AddActivity(faultActivity.Name, faultActivity.ExecuteUri, new
                 {
@@ -50,6 +55,34 @@ namespace MassTransit.Courier.Tests
             LocalBus.Execute(builder.Build());
 
             Assert.IsTrue(handled.WaitOne(Debugger.IsAttached ? 5.Minutes() : 30.Seconds()));
+        }
+
+        [Test]
+        public void Should_handle_the_failed_to_compensate_event()
+        {
+            var handledCompensationFailure = new ManualResetEvent(false);
+            var handledRoutingSlipFailure = new ManualResetEvent(false);
+
+            LocalBus.SubscribeHandler<RoutingSlipActivityCompensationFailed>(message => { handledCompensationFailure.Set(); });
+            LocalBus.SubscribeHandler<RoutingSlipCompensationFailed>(message => { handledRoutingSlipFailure.Set(); });
+
+            Assert.IsTrue(WaitForSubscription<RoutingSlipCompensationFailed>());
+            Assert.IsTrue(WaitForSubscription<RoutingSlipActivityCompensationFailed>());
+
+            ActivityTestContext testActivity = GetActivityContext<TestActivity>();
+            ActivityTestContext faultyCompensateActivity = GetActivityContext<FaultyCompensateActivity>();
+            ActivityTestContext faultActivity = GetActivityContext<FaultyActivity>();
+
+            var builder = new RoutingSlipBuilder(Guid.NewGuid());
+            builder.AddVariable("Value", "Hello");
+            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri);
+            builder.AddActivity(faultyCompensateActivity.Name, faultyCompensateActivity.ExecuteUri);
+            builder.AddActivity(faultActivity.Name, faultActivity.ExecuteUri);
+
+            LocalBus.Execute(builder.Build());
+
+            Assert.IsTrue(handledRoutingSlipFailure.WaitOne(Debugger.IsAttached ? 5.Minutes() : 30.Seconds()));
+            Assert.IsTrue(handledCompensationFailure.WaitOne(Debugger.IsAttached ? 5.Minutes() : 30.Seconds()));
         }
 
         Uri _localUri;
@@ -61,6 +94,8 @@ namespace MassTransit.Courier.Tests
             _localUri = new Uri(BaseUri, "local");
 
             AddActivityContext<TestActivity, TestArguments, TestLog>(() => new TestActivity());
+            AddActivityContext<SecondTestActivity, TestArguments, TestLog>(() => new SecondTestActivity());
+            AddActivityContext<FaultyCompensateActivity, TestArguments, TestLog>(() => new FaultyCompensateActivity());
             AddActivityContext<FaultyActivity, FaultyArguments, FaultyLog>(() => new FaultyActivity());
 
             LocalBus = CreateServiceBus(ConfigureLocalBus);

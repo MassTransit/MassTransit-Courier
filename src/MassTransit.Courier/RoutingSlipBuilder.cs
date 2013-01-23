@@ -22,10 +22,12 @@ namespace MassTransit.Courier
 
     public class RoutingSlipBuilder
     {
-        IList<ActivityLog> _activityLogs;
-        IList<Activity> _itinerary;
-        Guid _trackingNumber;
-        IDictionary<string, string> _variables;
+        static readonly IDictionary<string, string> _noArguments = new Dictionary<string, string>();
+
+        readonly IList<ActivityLog> _activityLogs;
+        readonly IList<Activity> _itinerary;
+        readonly Guid _trackingNumber;
+        readonly IDictionary<string, string> _variables;
 
         public RoutingSlipBuilder(Guid trackingNumber)
         {
@@ -54,21 +56,68 @@ namespace MassTransit.Courier
             return new RoutingSlipImpl(TrackingNumber, _itinerary, _activityLogs, _variables);
         }
 
+        public void AddActivity(string name, Uri executeAddress)
+        {
+            Activity activity = new ActivityImpl(name, executeAddress, _noArguments);
+            _itinerary.Add(activity);
+        }
+
         public void AddActivity(string name, Uri executeAddress, object arguments)
         {
             Activity activity = new ActivityImpl(name, executeAddress, GetObjectAsDictionary(arguments));
             _itinerary.Add(activity);
         }
 
+        public void AddActivity(string name, Uri executeAddress, IDictionary<string, string> arguments)
+        {
+            Activity activity = new ActivityImpl(name, executeAddress, arguments);
+            _itinerary.Add(activity);
+        }
+
         public void AddActivityLog(string name, Uri compensateAddress, object results)
         {
-            ActivityLog activity = new ActivityLogImpl(name, compensateAddress, GetObjectAsDictionary(results));
+            IDictionary<string, string> dictionary = GetObjectAsDictionary(results);
+            ActivityLog activity = new ActivityLogImpl(name, compensateAddress, dictionary);
+            _activityLogs.Add(activity);
+        }
+
+        public void AddActivityLog(string name, Uri compensateAddress, IDictionary<string, string> results)
+        {
+            ActivityLog activity = new ActivityLogImpl(name, compensateAddress, results);
             _activityLogs.Add(activity);
         }
 
         public void AddVariable(string key, string value)
         {
             _variables.Add(key, value);
+        }
+
+        /// <summary>
+        /// Sets the value of any existing variables to the value in the anonymous object,
+        /// as well as adding any additional variables that did not exist previously.
+        /// </summary>
+        /// <param name="values"></param>
+        public void SetVariables(object values)
+        {
+            IDictionary<string, string> dictionary = GetObjectAsDictionary(values);
+
+            ApplyDictionaryToVariables(dictionary);
+        }
+
+        public void SetVariables(IEnumerable<KeyValuePair<string, string>> values)
+        {
+            ApplyDictionaryToVariables(values);
+        }
+
+        void ApplyDictionaryToVariables(IEnumerable<KeyValuePair<string, string>> logValues)
+        {
+            foreach (var logValue in logValues)
+            {
+                if (string.IsNullOrEmpty(logValue.Value))
+                    _variables.Remove(logValue.Key);
+                else
+                    _variables[logValue.Key] = logValue.Value;
+            }
         }
 
         IDictionary<string, string> GetObjectAsDictionary(object values)

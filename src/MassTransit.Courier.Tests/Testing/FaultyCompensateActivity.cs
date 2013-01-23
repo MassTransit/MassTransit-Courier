@@ -15,23 +15,23 @@ namespace MassTransit.Courier.Tests.Testing
     using System;
 
 
-    public class TestActivity :
+    public class FaultyCompensateActivity :
         Activity<TestArguments, TestLog>
     {
         public ExecutionResult Execute(Execution<TestArguments> execution)
         {
-            Console.WriteLine("TestActivity: Execute: {0}", execution.Arguments.Value);
+            Console.WriteLine("FaultyCompensateActivity: Execute: {0}", execution.Arguments.Value);
 
             TestLog log = new TestLogImpl(execution.Arguments.Value);
 
-            return execution.Completed(log, new{ Value = "Hello, World!"});
+            return execution.Completed(log);
         }
 
         public CompensationResult Compensate(Compensation<TestLog> compensation)
         {
-            Console.WriteLine("TestActivity: Compensate original value: {0}", compensation.Log.OriginalValue);
+            Console.WriteLine("FaultyCompensateActivity: Compensate: {0}", compensation.Log.OriginalValue);
 
-            return compensation.Compensated();
+            return compensation.Failed();
         }
 
 

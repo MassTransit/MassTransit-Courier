@@ -13,6 +13,7 @@
 namespace MassTransit.Courier
 {
     using System;
+    using System.Collections.Generic;
 
 
     public interface Execution<out TArguments>
@@ -38,6 +39,28 @@ namespace MassTransit.Courier
         /// <param name="log"></param>
         /// <returns></returns>
         ExecutionResult Completed<TLog>(TLog log)
+            where TLog : class;
+
+        /// <summary>
+        /// Completes the activity, passing a compensation log entry and additional variables to set on 
+        /// the routing slip
+        /// </summary>
+        /// <typeparam name="TLog"></typeparam>
+        /// <param name="log"></param>
+        /// <param name="values">An anonymous object of values to add/set as variables on the routing slip</param>
+        /// <returns></returns>
+        ExecutionResult Completed<TLog>(TLog log, object values)
+            where TLog : class;
+
+        /// <summary>
+        /// Completes the activity, passing a compensation log entry and additional variables to set on 
+        /// the routing slip
+        /// </summary>
+        /// <typeparam name="TLog"></typeparam>
+        /// <param name="log"></param>
+        /// <param name="values">An dictionary of values to add/set as variables on the routing slip</param>
+        /// <returns></returns>
+        ExecutionResult Completed<TLog>(TLog log, IDictionary<string, string> values)
             where TLog : class;
 
         /// <summary>

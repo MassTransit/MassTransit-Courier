@@ -12,8 +12,24 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Courier.Tests.Testing
 {
-    public interface TestLog
+    using System;
+
+
+    public class SecondTestActivity :
+        Activity<TestArguments, TestLog>
     {
-        string OriginalValue { get; }
+        public ExecutionResult Execute(Execution<TestArguments> execution)
+        {
+            Console.WriteLine("SecondTestActivity: Execute: {0}", execution.Arguments.Value);
+
+            return execution.Completed();
+        }
+
+        public CompensationResult Compensate(Compensation<TestLog> compensation)
+        {
+            Console.WriteLine("SecondTestActivity: Compensate: {0}", compensation.Log.OriginalValue);
+
+            return compensation.Compensated();
+        }
     }
 }

@@ -43,6 +43,14 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Contracts\RoutingSlipActivityCompensated.cs" />
+    <Compile Include="Contracts\RoutingSlipActivityCompensationFailed.cs" />
+    <Compile Include="Contracts\RoutingSlipActivityCompleted.cs" />
+    <Compile Include="Contracts\RoutingSlipActivityFaulted.cs" />
+    <Compile Include="Contracts\RoutingSlipCompensationFailed.cs" />
+    <Compile Include="Internals\**\*.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="..\SolutionVersion.cs">
       <Link>SolutionVersion.cs</Link>
     </Compile>
@@ -68,6 +76,12 @@
     <Compile Include="Hosts\HostExecution.cs" />
     <Compile Include="Hosts\RoutingSlipImpl.cs" />
     <Compile Include="Hosts\SanitizedRoutingSlip.cs" />
+    <Compile Include="InternalMessages\CompensationFailedMessage.cs" />
+    <Compile Include="InternalMessages\RoutingSlipActivityCompensatedMessage.cs" />
+    <Compile Include="InternalMessages\RoutingSlipActivityCompletedMessage.cs" />
+    <Compile Include="InternalMessages\RoutingSlipActivityFaultedMessage.cs" />
+    <Compile Include="InternalMessages\RoutingSlipCompletedMessage.cs" />
+    <Compile Include="InternalMessages\RoutingSlipFaultedMessage.cs" />
     <Compile Include="RoutingSlipBuilder.cs" />
     <Compile Include="RoutingSlipExtensions.cs" />
   </ItemGroup>

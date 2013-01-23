@@ -13,29 +13,33 @@
 namespace MassTransit.Courier.Contracts
 {
     using System;
-    using System.Collections.Generic;
 
 
-    /// <summary>
-    /// Published when a routing slip completes
-    /// </summary>
-    public interface RoutingSlipCompleted
+    public interface RoutingSlipCompensationFailed
     {
         /// <summary>
-        /// The tracking number of the routing slip that completed
+        /// The tracking number of the routing slip that faulted
         /// </summary>
         Guid TrackingNumber { get; }
 
         /// <summary>
-        /// The date/time when the routing slip completed
+        /// The date/time when the routing slip compensation was finished
         /// </summary>
         DateTime Timestamp { get; }
 
         /// <summary>
-        /// The variables that were present once the routing slip completed, can be used
-        /// to capture the output of the slip - real events should likely be used for real
-        /// completion items but this is useful for some cases
+        /// The exception source
         /// </summary>
-        IDictionary<string, string> Variables { get; }
+        string Source { get; }
+
+        /// <summary>
+        /// The exception message
+        /// </summary>
+        string Message { get; }
+
+        /// <summary>
+        /// The exception stack trace
+        /// </summary>
+        string StackTrace { get; }
     }
 }

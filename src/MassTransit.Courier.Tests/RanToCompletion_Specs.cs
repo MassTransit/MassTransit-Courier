@@ -47,6 +47,22 @@ namespace MassTransit.Courier.Tests
             Assert.IsTrue(handled.WaitOne(Debugger.IsAttached ? 5.Minutes() : 30.Seconds()));
         }
 
+        [Test]
+        public void Should_immediately_complete_an_empty_list()
+        {
+            var handled = new ManualResetEvent(false);
+
+            LocalBus.SubscribeHandler<RoutingSlipCompleted>(message => { handled.Set(); });
+
+            Assert.IsTrue(WaitForSubscription<RoutingSlipCompleted>());
+
+            var builder = new RoutingSlipBuilder(Guid.NewGuid());
+
+            LocalBus.Execute(builder.Build());
+
+            Assert.IsTrue(handled.WaitOne(Debugger.IsAttached ? 5.Minutes() : 30.Seconds()));
+        }
+
         Uri _localUri;
         IServiceBus LocalBus { get; set; }
 

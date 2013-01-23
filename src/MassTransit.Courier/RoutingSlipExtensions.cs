@@ -15,6 +15,7 @@ namespace MassTransit.Courier
     using System;
     using System.Linq;
     using Contracts;
+    using InternalMessages;
 
 
     public static class RoutingSlipExtensions
@@ -57,18 +58,12 @@ namespace MassTransit.Courier
         public static void Execute(this IServiceBus bus, RoutingSlip routingSlip)
         {
             if (routingSlip.RanToCompletion())
-            {
-                bus.Publish<RoutingSlipCompleted>(new
-                    {
-                        routingSlip.TrackingNumber,
-                        Timestamp = DateTime.UtcNow,
-                    });
-            }
+                bus.Publish(new RoutingSlipCompletedMessage(routingSlip.TrackingNumber, routingSlip.Variables));
             else
             {
                 IEndpoint endpoint = bus.GetEndpoint(routingSlip.GetNextExecuteAddress());
 
-                endpoint.Send(routingSlip, x => { x.SetSourceAddress(bus.Endpoint.Address.Uri); });
+                endpoint.Send(routingSlip, x => x.SetSourceAddress(bus.Endpoint.Address.Uri));
             }
         }
     }

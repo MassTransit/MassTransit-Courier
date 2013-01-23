@@ -13,24 +13,21 @@
 namespace MassTransit.Courier.Hosts
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using Contracts;
     using Logging;
-    using Magnum.Reflection;
 
 
-    public class CompensateActivityHost<TController, TLog> :
+    public class CompensateActivityHost<TActivity, TLog> :
         Consumes<RoutingSlip>.Context
-        where TController : CompensateActivity<TLog>
+        where TActivity : CompensateActivity<TLog>
         where TLog : class
     {
-        readonly Func<TLog, TController> _controllerFactory;
-        readonly ILog _log = Logger.Get<CompensateActivityHost<TController, TLog>>();
+        readonly Func<TLog, TActivity> _activityFactory;
+        readonly ILog _log = Logger.Get<CompensateActivityHost<TActivity, TLog>>();
 
-        public CompensateActivityHost(Func<TLog, TController> controllerFactory)
+        public CompensateActivityHost(Func<TLog, TActivity> activityFactory)
         {
-            _controllerFactory = controllerFactory;
+            _activityFactory = activityFactory;
         }
 
         public void Consume(IConsumeContext<RoutingSlip> context)
@@ -42,7 +39,7 @@ namespace MassTransit.Courier.Hosts
 
             try
             {
-                TController controller = _controllerFactory(compensation.Log);
+                TActivity controller = _activityFactory(compensation.Log);
 
                 CompensationResult result = controller.Compensate(compensation);
             }
@@ -50,14 +47,6 @@ namespace MassTransit.Courier.Hosts
             {
                 compensation.Failed(ex);
             }
-        }
-
-        static TLog GetActivityLogResults(ActivityLog activityLog)
-        {
-            IDictionary<string, string> dictionary = activityLog.Results ?? new Dictionary<string, string>();
-            IDictionary<string, object> initializer = dictionary.ToDictionary(x => x.Key, x => (object)x.Value);
-
-            return InterfaceImplementationExtensions.InitializeProxy<TLog>(initializer);
         }
     }
 }
