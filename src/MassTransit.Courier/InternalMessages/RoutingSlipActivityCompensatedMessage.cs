@@ -13,20 +13,26 @@
 namespace MassTransit.Courier.InternalMessages
 {
     using System;
+    using System.Collections.Generic;
     using Contracts;
 
 
     class RoutingSlipActivityCompensatedMessage :
         RoutingSlipActivityCompensated
     {
-        public RoutingSlipActivityCompensatedMessage(Guid trackingNumber, string activityName)
+        public RoutingSlipActivityCompensatedMessage(Guid trackingNumber, Guid activityTrackingNumber,
+            string activityName, IDictionary<string, string> results)
         {
             Timestamp = DateTime.UtcNow;
 
             TrackingNumber = trackingNumber;
+            ActivityTrackingNumber = activityTrackingNumber;
             ActivityName = activityName;
+            Results = results;
         }
 
+        public Guid ActivityTrackingNumber { get; private set; }
+        public IDictionary<string, string> Results { get; private set; }
         public string ActivityName { get; private set; }
 
         public Guid TrackingNumber { get; private set; }

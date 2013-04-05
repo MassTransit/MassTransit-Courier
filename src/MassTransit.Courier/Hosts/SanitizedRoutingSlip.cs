@@ -75,11 +75,13 @@ namespace MassTransit.Courier.Hosts
                 if (activityLog.CompensateAddress == null)
                     throw new SerializationException("An ActivityLog CompensateAddress is required");
 
+                ActivityTrackingNumber = activityLog.ActivityTrackingNumber;
                 Name = activityLog.Name;
                 CompensateAddress = activityLog.CompensateAddress;
                 Results = activityLog.Results ?? new Dictionary<string, string>();
             }
 
+            public Guid ActivityTrackingNumber { get; private set; }
             public string Name { get; private set; }
             public Uri CompensateAddress { get; private set; }
             public IDictionary<string, string> Results { get; private set; }

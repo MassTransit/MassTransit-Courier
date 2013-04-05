@@ -64,7 +64,8 @@ namespace MassTransit.Courier.Hosts
 
         public CompensationResult Failed(Exception exception)
         {
-            var message = new CompensationFailedMessage(_routingSlip.TrackingNumber, _activityLog.Name, exception);
+            var message = new CompensationFailedMessage(_routingSlip.TrackingNumber, _activityLog.ActivityTrackingNumber,
+                _activityLog.Name, exception);
             _context.Bus.Publish(message);
 
             // the exception is thrown so MT will move the routing slip into the error queue
@@ -74,7 +75,7 @@ namespace MassTransit.Courier.Hosts
         CompensationResult Compensated(RoutingSlip routingSlip)
         {
             _context.Bus.Publish(new RoutingSlipActivityCompensatedMessage(_routingSlip.TrackingNumber,
-                _activityLog.Name));
+                _activityLog.ActivityTrackingNumber, _activityLog.Name, _activityLog.Results));
 
             if (routingSlip.IsRunning())
             {

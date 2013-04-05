@@ -22,7 +22,7 @@ namespace MassTransit.Courier
 
     public class RoutingSlipBuilder
     {
-        static readonly IDictionary<string, string> _noArguments = new Dictionary<string, string>();
+        public static readonly IDictionary<string, string> NoArguments = new Dictionary<string, string>();
 
         readonly IList<ActivityLog> _activityLogs;
         readonly IList<Activity> _itinerary;
@@ -58,7 +58,7 @@ namespace MassTransit.Courier
 
         public void AddActivity(string name, Uri executeAddress)
         {
-            Activity activity = new ActivityImpl(name, executeAddress, _noArguments);
+            Activity activity = new ActivityImpl(name, executeAddress, NoArguments);
             _itinerary.Add(activity);
         }
 
@@ -74,17 +74,25 @@ namespace MassTransit.Courier
             _itinerary.Add(activity);
         }
 
-        public void AddActivityLog(string name, Uri compensateAddress, object results)
+        public ActivityLog AddActivityLog(string name, Uri compensateAddress, object logObject)
         {
-            IDictionary<string, string> dictionary = GetObjectAsDictionary(results);
-            ActivityLog activity = new ActivityLogImpl(name, compensateAddress, dictionary);
-            _activityLogs.Add(activity);
+            Guid activityTrackingNumber = NewId.NextGuid();
+            IDictionary<string, string> results = GetObjectAsDictionary(logObject);
+
+            ActivityLog activityLog = new ActivityLogImpl(activityTrackingNumber, name, compensateAddress, results);
+            _activityLogs.Add(activityLog);
+
+            return activityLog;
         }
 
-        public void AddActivityLog(string name, Uri compensateAddress, IDictionary<string, string> results)
+        public ActivityLog AddActivityLog(string name, Uri compensateAddress, IDictionary<string, string> results)
         {
-            ActivityLog activity = new ActivityLogImpl(name, compensateAddress, results);
-            _activityLogs.Add(activity);
+            Guid activityTrackingNumber = NewId.NextGuid();
+
+            ActivityLog activityLog = new ActivityLogImpl(activityTrackingNumber, name, compensateAddress, results);
+            _activityLogs.Add(activityLog);
+
+            return activityLog;
         }
 
         public void AddVariable(string key, string value)
@@ -147,13 +155,16 @@ namespace MassTransit.Courier
         class ActivityLogImpl :
             ActivityLog
         {
-            public ActivityLogImpl(string name, Uri compensateAddress, IDictionary<string, string> results)
+            public ActivityLogImpl(Guid activityTrackingNumber, string name, Uri compensateAddress,
+                IDictionary<string, string> results)
             {
+                ActivityTrackingNumber = activityTrackingNumber;
                 Name = name;
                 CompensateAddress = compensateAddress;
                 Results = results;
             }
 
+            public Guid ActivityTrackingNumber { get; private set; }
             public string Name { get; private set; }
             public Uri CompensateAddress { get; private set; }
             public IDictionary<string, string> Results { get; private set; }

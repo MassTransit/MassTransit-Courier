@@ -15,7 +15,6 @@ namespace MassTransit.Courier.Tests
     using System;
     using System.Diagnostics;
     using System.Threading;
-    using BusConfigurators;
     using Contracts;
     using Magnum.Extensions;
     using NUnit.Framework;
@@ -26,6 +25,22 @@ namespace MassTransit.Courier.Tests
     public class When_an_activity_runs_to_completion :
         ActivityTestFixture
     {
+        [Test]
+        public void Should_immediately_complete_an_empty_list()
+        {
+            var handled = new ManualResetEvent(false);
+
+            LocalBus.SubscribeHandler<RoutingSlipCompleted>(message => { handled.Set(); });
+
+            Assert.IsTrue(WaitForSubscription<RoutingSlipCompleted>());
+
+            var builder = new RoutingSlipBuilder(Guid.NewGuid());
+
+            LocalBus.Execute(builder.Build());
+
+            Assert.IsTrue(handled.WaitOne(Debugger.IsAttached ? 5.Minutes() : 30.Seconds()));
+        }
+
         [Test]
         public void Should_publish_the_completed_event()
         {
@@ -47,44 +62,9 @@ namespace MassTransit.Courier.Tests
             Assert.IsTrue(handled.WaitOne(Debugger.IsAttached ? 5.Minutes() : 30.Seconds()));
         }
 
-        [Test]
-        public void Should_immediately_complete_an_empty_list()
+        protected override void SetupActivities()
         {
-            var handled = new ManualResetEvent(false);
-
-            LocalBus.SubscribeHandler<RoutingSlipCompleted>(message => { handled.Set(); });
-
-            Assert.IsTrue(WaitForSubscription<RoutingSlipCompleted>());
-
-            var builder = new RoutingSlipBuilder(Guid.NewGuid());
-
-            LocalBus.Execute(builder.Build());
-
-            Assert.IsTrue(handled.WaitOne(Debugger.IsAttached ? 5.Minutes() : 30.Seconds()));
-        }
-
-        Uri _localUri;
-        IServiceBus LocalBus { get; set; }
-
-        [TestFixtureSetUp]
-        public void Setup()
-        {
-            _localUri = new Uri(BaseUri, "local");
-
             AddActivityContext<TestActivity, TestArguments, TestLog>(() => new TestActivity());
-
-            LocalBus = CreateServiceBus(ConfigureLocalBus);
-        }
-
-        [TestFixtureTearDown]
-        public void Teardown()
-        {
-            LocalBus.Dispose();
-        }
-
-        protected virtual void ConfigureLocalBus(ServiceBusConfigurator configurator)
-        {
-            configurator.ReceiveFrom(_localUri);
         }
     }
 }

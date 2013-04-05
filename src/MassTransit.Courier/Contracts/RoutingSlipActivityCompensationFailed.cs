@@ -28,6 +28,11 @@ namespace MassTransit.Courier.Contracts
         DateTime Timestamp { get; }
 
         /// <summary>
+        /// The tracking number for completion of the activity
+        /// </summary>
+        Guid ActivityTrackingNumber { get; }
+
+        /// <summary>
         /// The name of the activity that failed to compensate
         /// </summary>
         string ActivityName { get; }

@@ -21,10 +21,24 @@ namespace MassTransit.Courier.Contracts
     /// </summary>
     public interface ActivityLog
     {
+        /// <summary>
+        /// The tracking number for completion of the activity
+        /// </summary>
+        Guid ActivityTrackingNumber { get; }
+
+        /// <summary>
+        /// The name of the activity that was completed
+        /// </summary>
         string Name { get; }
 
+        /// <summary>
+        /// The compensation address where the routing slip should be sent for compensation
+        /// </summary>
         Uri CompensateAddress { get; }
 
+        /// <summary>
+        /// The results of the activity saved for compensation
+        /// </summary>
         IDictionary<string, string> Results { get; }
     }
 }

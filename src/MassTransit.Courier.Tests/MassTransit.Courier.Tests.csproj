@@ -65,8 +65,10 @@
     <Compile Include="ActivityHost_Specs.cs" />
     <Compile Include="Configuration_Specs.cs" />
     <Compile Include="ContextSetup.cs" />
+    <Compile Include="FaultActivityEvent_Specs.cs" />
     <Compile Include="RanToCompletion_Specs.cs" />
     <Compile Include="EndpointCacheProxy.cs" />
+    <Compile Include="SingleActivityEvent_Specs.cs" />
     <Compile Include="Testing\FaultyActivity.cs" />
     <Compile Include="Testing\FaultyArguments.cs" />
     <Compile Include="Testing\FaultyCompensateActivity.cs" />
@@ -79,6 +81,7 @@
     <Compile Include="Testing\ActivityTestContext.cs" />
     <Compile Include="Testing\ActivityTestFixture.cs" />
     <Compile Include="Testing\TestLog.cs" />
+    <Compile Include="TwoActivityEvent_Specs.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MassTransit.Courier\MassTransit.Courier.csproj">

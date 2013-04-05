@@ -13,22 +13,30 @@
 namespace MassTransit.Courier.InternalMessages
 {
     using System;
+    using System.Collections.Generic;
     using Contracts;
 
 
     class RoutingSlipActivityCompletedMessage :
         RoutingSlipActivityCompleted
     {
-        public RoutingSlipActivityCompletedMessage(Guid trackingNumber, string activityName)
+        public RoutingSlipActivityCompletedMessage(Guid trackingNumber, Guid activityTrackingNumber, string activityName,
+            IDictionary<string, string> results, IDictionary<string, string> variables)
         {
             Timestamp = DateTime.UtcNow;
 
             TrackingNumber = trackingNumber;
+            ActivityTrackingNumber = activityTrackingNumber;
             ActivityName = activityName;
+            Results = results;
+            Variables = variables;
         }
 
         public Guid TrackingNumber { get; private set; }
         public DateTime Timestamp { get; private set; }
+        public Guid ActivityTrackingNumber { get; private set; }
         public string ActivityName { get; private set; }
+        public IDictionary<string, string> Results { get; private set; }
+        public IDictionary<string, string> Variables { get; private set; }
     }
 }

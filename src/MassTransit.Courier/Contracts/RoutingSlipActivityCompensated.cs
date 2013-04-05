@@ -13,6 +13,7 @@
 namespace MassTransit.Courier.Contracts
 {
     using System;
+    using System.Collections.Generic;
 
 
     public interface RoutingSlipActivityCompensated
@@ -26,5 +27,20 @@ namespace MassTransit.Courier.Contracts
         /// The date/time when the routing slip compensation was finished
         /// </summary>
         DateTime Timestamp { get; }
+
+        /// <summary>
+        /// The tracking number for completion of the activity
+        /// </summary>
+        Guid ActivityTrackingNumber { get; }
+
+        /// <summary>
+        /// The results of the activity saved for compensation
+        /// </summary>
+        IDictionary<string, string> Results { get; }
+
+        /// <summary>
+        /// The name of the activity that completed
+        /// </summary>
+        string ActivityName { get; }
     }
 }

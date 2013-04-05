@@ -14,12 +14,14 @@ namespace MassTransit.Courier.Tests.Testing
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
+    using System.Threading;
     using BusConfigurators;
     using Configurators;
     using EndpointConfigurators;
+    using Exceptions;
     using Magnum.Extensions;
-    using MassTransit.Exceptions;
     using MassTransit.Testing;
     using NUnit.Framework;
     using Saga;
@@ -31,10 +33,14 @@ namespace MassTransit.Courier.Tests.Testing
     {
         readonly EndpointFactoryConfiguratorImpl _endpointFactoryConfigurator;
         EndpointCache _endpointCache;
+        CancellationToken _cancellationToken;
+        static Timer _timer;
+        static CancellationTokenSource _cancellationTokenSource;
 
         protected ActivityTestFixture()
             : this(new Uri("loopback://localhost"))
         {
+            TestTimeout = Debugger.IsAttached ? 30.Seconds() : 5.Minutes();
         }
 
         protected ActivityTestFixture(Uri baseUri)
@@ -49,6 +55,8 @@ namespace MassTransit.Courier.Tests.Testing
             ActivityTestContexts = new Dictionary<Type, ActivityTestContext>();
         }
 
+        protected Uri LocalUri { get; private set; }
+        protected IServiceBus LocalBus { get; private set; }
         protected Uri BaseUri { get; private set; }
         protected IDictionary<Type, ActivityTestContext> ActivityTestContexts { get; private set; }
         protected IEndpointFactory EndpointFactory { get; private set; }
@@ -84,6 +92,12 @@ namespace MassTransit.Courier.Tests.Testing
                     x.SetReceiveTimeout(50.Milliseconds());
                     x.EnableAutoStart();
                 });
+
+            LocalUri = new Uri(BaseUri, "local");
+
+            SetupActivities();
+
+            LocalBus = CreateServiceBus(ConfigureLocalBus);
         }
 
         [TestFixtureTearDown]
@@ -91,6 +105,13 @@ namespace MassTransit.Courier.Tests.Testing
         {
             foreach (ActivityTestContext activityTestContext in ActivityTestContexts.Values)
                 activityTestContext.Dispose();
+
+            LocalBus.Dispose();
+
+            if (_cancellationTokenSource != null)
+                _cancellationTokenSource.Dispose();
+            if (_timer != null)
+                _timer.Dispose();
 
             _endpointCache.Clear();
 
@@ -119,6 +140,11 @@ namespace MassTransit.Courier.Tests.Testing
             ActivityTestContexts.Add(typeof(T), context);
         }
 
+        protected virtual void ConfigureLocalBus(ServiceBusConfigurator configurator)
+        {
+            configurator.ReceiveFrom(LocalUri);
+        }
+
         protected virtual IServiceBus CreateServiceBus(Action<ServiceBusConfigurator> configurator)
         {
             return ServiceBusFactory.New(x =>
@@ -133,13 +159,42 @@ namespace MassTransit.Courier.Tests.Testing
         protected virtual bool WaitForSubscription<T>()
             where T : class
         {
-            return ActivityTestContexts.Values.All(x => ScenarioAssertionExtensions.HasSubscription<T>(x.ExecuteBus).Any()
-                                                 && x.CompensateBus.HasSubscription<T>().Any());
+            return ActivityTestContexts.Values.All(x => x.ExecuteBus.HasSubscription<T>().Any()
+                                                        && x.CompensateBus.HasSubscription<T>().Any());
         }
 
         protected ActivityTestContext GetActivityContext<T>()
         {
             return ActivityTestContexts[typeof(T)];
+        }
+
+        protected CancellationToken TestCancellationToken
+        {
+            get
+            {
+                if (_cancellationToken == CancellationToken.None)
+                    _cancellationToken = Delay((int)TestTimeout.TotalMilliseconds);
+
+                return _cancellationToken;
+            }
+        }
+
+        protected TimeSpan TestTimeout { get; set; }
+
+        public static CancellationToken Delay(int millisecondsTimeout)
+        {
+            _cancellationTokenSource = new CancellationTokenSource();
+            _timer = null;
+
+            _timer = new Timer(delegate
+                {
+                    _timer.Dispose();
+                    _cancellationTokenSource.Cancel();
+                }, null, Timeout.Infinite, Timeout.Infinite);
+
+            _timer.Change(millisecondsTimeout, Timeout.Infinite);
+
+            return _cancellationTokenSource.Token;
         }
 
         protected void ConfigureEndpointFactory(Action<EndpointFactoryConfigurator> configure)
@@ -157,5 +212,7 @@ namespace MassTransit.Courier.Tests.Testing
 
             return sagaRepository;
         }
+
+        protected abstract void SetupActivities();
     }
 }

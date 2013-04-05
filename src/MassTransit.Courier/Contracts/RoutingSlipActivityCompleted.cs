@@ -13,6 +13,7 @@
 namespace MassTransit.Courier.Contracts
 {
     using System;
+    using System.Collections.Generic;
 
 
     public interface RoutingSlipActivityCompleted
@@ -28,8 +29,25 @@ namespace MassTransit.Courier.Contracts
         DateTime Timestamp { get; }
 
         /// <summary>
+        /// The tracking number for completion of the activity
+        /// </summary>
+        Guid ActivityTrackingNumber { get; }
+
+        /// <summary>
         /// The name of the activity that completed
         /// </summary>
         string ActivityName { get; }
+
+        /// <summary>
+        /// The results saved as the ActivityLog by the Activity
+        /// </summary>
+        IDictionary<string, string> Results { get; }
+
+        /// <summary>
+        /// The variables that were present once the routing slip completed, can be used
+        /// to capture the output of the slip - real events should likely be used for real
+        /// completion items but this is useful for some cases
+        /// </summary>
+        IDictionary<string, string> Variables { get; }
     }
 }

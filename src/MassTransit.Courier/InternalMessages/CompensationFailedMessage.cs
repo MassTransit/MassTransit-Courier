@@ -20,11 +20,13 @@ namespace MassTransit.Courier.InternalMessages
         RoutingSlipActivityCompensationFailed,
         RoutingSlipCompensationFailed
     {
-        public CompensationFailedMessage(Guid trackingNumber, string activityName, Exception exception)
+        public CompensationFailedMessage(Guid trackingNumber, Guid activityTrackingNumber, string activityName,
+            Exception exception)
         {
             Timestamp = DateTime.UtcNow;
 
             TrackingNumber = trackingNumber;
+            ActivityTrackingNumber = activityTrackingNumber;
             ActivityName = activityName;
             Source = exception.Source;
             Message = exception.Message;
@@ -33,6 +35,7 @@ namespace MassTransit.Courier.InternalMessages
 
         public Guid TrackingNumber { get; private set; }
         public DateTime Timestamp { get; private set; }
+        public Guid ActivityTrackingNumber { get; private set; }
         public string ActivityName { get; private set; }
         public string Source { get; private set; }
         public string Message { get; private set; }

@@ -15,7 +15,6 @@ namespace MassTransit.Courier.Tests
     using System;
     using System.Diagnostics;
     using System.Threading;
-    using BusConfigurators;
     using Contracts;
     using Magnum.Extensions;
     using NUnit.Framework;
@@ -85,31 +84,12 @@ namespace MassTransit.Courier.Tests
             Assert.IsTrue(handledCompensationFailure.WaitOne(Debugger.IsAttached ? 5.Minutes() : 30.Seconds()));
         }
 
-        Uri _localUri;
-        IServiceBus LocalBus { get; set; }
-
-        [TestFixtureSetUp]
-        public void Setup()
+        protected override void SetupActivities()
         {
-            _localUri = new Uri(BaseUri, "local");
-
             AddActivityContext<TestActivity, TestArguments, TestLog>(() => new TestActivity());
             AddActivityContext<SecondTestActivity, TestArguments, TestLog>(() => new SecondTestActivity());
             AddActivityContext<FaultyCompensateActivity, TestArguments, TestLog>(() => new FaultyCompensateActivity());
             AddActivityContext<FaultyActivity, FaultyArguments, FaultyLog>(() => new FaultyActivity());
-
-            LocalBus = CreateServiceBus(ConfigureLocalBus);
-        }
-
-        [TestFixtureTearDown]
-        public void Teardown()
-        {
-            LocalBus.Dispose();
-        }
-
-        protected virtual void ConfigureLocalBus(ServiceBusConfigurator configurator)
-        {
-            configurator.ReceiveFrom(_localUri);
         }
     }
 }

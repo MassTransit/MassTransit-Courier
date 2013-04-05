@@ -56,33 +56,36 @@ namespace MassTransit.Courier.Hosts
         {
             RoutingSlipBuilder builder = CreateRoutingSlipBuilder();
 
-            return Complete(builder.Build());
+            return Complete(builder.Build(), NewId.NextGuid(), RoutingSlipBuilder.NoArguments);
         }
 
         public ExecutionResult Completed<TLog>(TLog log)
             where TLog : class
         {
-            RoutingSlipBuilder builder = CreateRoutingSlipBuilder(log);
+            ActivityLog activityLog;
+            RoutingSlipBuilder builder = CreateRoutingSlipBuilder(log, out activityLog);
 
-            return Complete(builder.Build());
+            return Complete(builder.Build(), activityLog.ActivityTrackingNumber, activityLog.Results);
         }
 
         public ExecutionResult Completed<TLog>(TLog log, object values)
             where TLog : class
         {
-            RoutingSlipBuilder builder = CreateRoutingSlipBuilder(log);
+            ActivityLog activityLog;
+            RoutingSlipBuilder builder = CreateRoutingSlipBuilder(log, out activityLog);
             builder.SetVariables(values);
 
-            return Complete(builder.Build());
+            return Complete(builder.Build(), activityLog.ActivityTrackingNumber, activityLog.Results);
         }
 
         public ExecutionResult Completed<TLog>(TLog log, IDictionary<string, string> values)
             where TLog : class
         {
-            RoutingSlipBuilder builder = CreateRoutingSlipBuilder(log);
+            ActivityLog activityLog;
+            RoutingSlipBuilder builder = CreateRoutingSlipBuilder(log, out activityLog);
             builder.SetVariables(values);
 
-            return Complete(builder.Build());
+            return Complete(builder.Build(), activityLog.ActivityTrackingNumber, activityLog.Results);
         }
 
         public ExecutionResult Faulted()
@@ -109,31 +112,33 @@ namespace MassTransit.Courier.Hosts
             return new FaultedResult();
         }
 
-        RoutingSlipBuilder CreateRoutingSlipBuilder<TLog>(TLog log)
+        RoutingSlipBuilder CreateRoutingSlipBuilder<TLog>(TLog log, out ActivityLog activityLog)
             where TLog : class
         {
             RoutingSlipBuilder builder = CreateRoutingSlipBuilder();
-            builder.AddActivityLog(_activity.Name, _compensationAddress, log);
+
+            activityLog = builder.AddActivityLog(_activity.Name, _compensationAddress, log);
 
             return builder;
         }
 
         RoutingSlipBuilder CreateRoutingSlipBuilder()
         {
-            return new RoutingSlipBuilder(_routingSlip.TrackingNumber,
-                _routingSlip.Itinerary.Skip(1), _routingSlip.ActivityLogs, _routingSlip.Variables);
+            return new RoutingSlipBuilder(_routingSlip.TrackingNumber, _routingSlip.Itinerary.Skip(1),
+                _routingSlip.ActivityLogs, _routingSlip.Variables);
         }
 
-        ExecutionResult Complete(RoutingSlip routingSlip)
+        ExecutionResult Complete(RoutingSlip routingSlip, Guid activityTrackingNumber, IDictionary<string, string> results)
         {
+            _context.Bus.Publish(new RoutingSlipActivityCompletedMessage(routingSlip.TrackingNumber,
+                activityTrackingNumber, _activity.Name, results, routingSlip.Variables));
+
             if (routingSlip.RanToCompletion())
             {
                 _context.Bus.Publish(new RoutingSlipCompletedMessage(routingSlip.TrackingNumber, routingSlip.Variables));
 
                 return new RanToCompletionResult();
             }
-
-            _context.Bus.Publish(new RoutingSlipActivityCompletedMessage(routingSlip.TrackingNumber, _activity.Name));
 
             IEndpoint endpoint = _context.Bus.GetEndpoint(routingSlip.GetNextExecuteAddress());
 
