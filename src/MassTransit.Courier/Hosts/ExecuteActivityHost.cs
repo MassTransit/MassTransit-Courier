@@ -17,24 +17,24 @@ namespace MassTransit.Courier.Hosts
     using Logging;
 
 
-    public class ExecuteActivityHost<TController, TArguments> :
+    public class ExecuteActivityHost<TActivity, TArguments> :
         Consumes<RoutingSlip>.Context
-        where TController : ExecuteActivity<TArguments>
+        where TActivity : ExecuteActivity<TArguments>
         where TArguments : class
     {
+        readonly Func<TArguments, TActivity> _activityFactory;
         readonly Uri _compensateAddress;
-        readonly Func<TArguments, TController> _controllerFactory;
-        readonly ILog _log = Logger.Get<ExecuteActivityHost<TController, TArguments>>();
+        readonly ILog _log = Logger.Get<ExecuteActivityHost<TActivity, TArguments>>();
 
-        public ExecuteActivityHost(Uri compensateAddress, Func<TArguments, TController> controllerFactory)
+        public ExecuteActivityHost(Uri compensateAddress, Func<TArguments, TActivity> activityFactory)
         {
             if (compensateAddress == null)
                 throw new ArgumentNullException("compensateAddress");
-            if (controllerFactory == null)
-                throw new ArgumentNullException("controllerFactory");
+            if (activityFactory == null)
+                throw new ArgumentNullException("activityFactory");
 
             _compensateAddress = compensateAddress;
-            _controllerFactory = controllerFactory;
+            _activityFactory = activityFactory;
         }
 
         public void Consume(IConsumeContext<RoutingSlip> context)
@@ -46,9 +46,9 @@ namespace MassTransit.Courier.Hosts
 
             try
             {
-                TController controller = _controllerFactory(execution.Arguments);
+                TActivity activity = _activityFactory(execution.Arguments);
 
-                ExecutionResult result = controller.Execute(execution);
+                ExecutionResult result = activity.Execute(execution);
             }
             catch (Exception ex)
             {

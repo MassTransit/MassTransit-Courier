@@ -35,13 +35,14 @@ namespace MassTransit.Courier.Hosts
             var compensation = new HostCompensation<TLog>(context);
 
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Host: {0} Executing: {1}", context.Bus.Endpoint.Address, compensation.TrackingNumber);
+                _log.DebugFormat("Host: {0} Compensating: {1}", context.Bus.Endpoint.Address,
+                    compensation.TrackingNumber);
 
             try
             {
-                TActivity controller = _activityFactory(compensation.Log);
+                TActivity activity = _activityFactory(compensation.Log);
 
-                CompensationResult result = controller.Compensate(compensation);
+                CompensationResult result = activity.Compensate(compensation);
             }
             catch (Exception ex)
             {

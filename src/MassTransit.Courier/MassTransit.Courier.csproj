@@ -67,7 +67,7 @@
     <Compile Include="ExecuteActivity.cs" />
     <Compile Include="Execution.cs" />
     <Compile Include="ExecutionResult.cs" />
-    <Compile Include="Extensions\EndpointExtensions.cs" />
+    <Compile Include="EndpointExtensions.cs" />
     <Compile Include="Extensions\LinqExtensions.cs" />
     <Compile Include="HostSubscriptionExtensions.cs" />
     <Compile Include="Hosts\CompensateActivityHost.cs" />
