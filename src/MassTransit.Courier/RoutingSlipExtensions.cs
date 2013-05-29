@@ -48,7 +48,7 @@ namespace MassTransit.Courier
             return activity.ExecuteAddress;
         }
 
-        public static Uri GetLastCompensateAddress(this RoutingSlip routingSlip)
+        public static Uri GetNextCompensateAddress(this RoutingSlip routingSlip)
         {
             ActivityLog activity = routingSlip.ActivityLogs.Last();
 

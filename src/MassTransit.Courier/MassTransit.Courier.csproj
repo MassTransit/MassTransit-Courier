@@ -40,18 +40,22 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\MassTransit.2.7.3\lib\net40\MassTransit.dll</HintPath>
     </Reference>
-    <Reference Include="MassTransit.Transports.MSMQ">
-      <HintPath>..\packages\MassTransit.2.7.3\lib\net40\MassTransit.Transports.MSMQ.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Contracts\ActivityExceptionInfo.cs" />
+    <Compile Include="Contracts\ExceptionInfo.cs" />
     <Compile Include="Contracts\RoutingSlipActivityCompensated.cs" />
     <Compile Include="Contracts\RoutingSlipActivityCompensationFailed.cs" />
     <Compile Include="Contracts\RoutingSlipActivityCompleted.cs" />
     <Compile Include="Contracts\RoutingSlipActivityFaulted.cs" />
     <Compile Include="Contracts\RoutingSlipCompensationFailed.cs" />
+    <Compile Include="Hosts\CompensateResult.cs" />
+    <Compile Include="Hosts\FaultResult.cs" />
+    <Compile Include="Hosts\NextActivityResult.cs" />
+    <Compile Include="Hosts\RanToCompletionResult.cs" />
+    <Compile Include="InternalMessages\ExceptionInfoImpl.cs" />
     <Compile Include="Internals\**\*.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -71,7 +75,6 @@
     <Compile Include="ExecuteActivity.cs" />
     <Compile Include="Execution.cs" />
     <Compile Include="ExecutionResult.cs" />
-    <Compile Include="EndpointExtensions.cs" />
     <Compile Include="Extensions\LinqExtensions.cs" />
     <Compile Include="HostSubscriptionExtensions.cs" />
     <Compile Include="Hosts\CompensateActivityHost.cs" />

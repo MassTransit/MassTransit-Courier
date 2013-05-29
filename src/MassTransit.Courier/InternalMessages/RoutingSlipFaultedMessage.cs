@@ -13,20 +13,32 @@
 namespace MassTransit.Courier.InternalMessages
 {
     using System;
+    using System.Collections.Generic;
     using Contracts;
 
 
     class RoutingSlipFaultedMessage :
         RoutingSlipFaulted
     {
-        public RoutingSlipFaultedMessage(Guid trackingNumber)
+        public RoutingSlipFaultedMessage(Guid trackingNumber, IList<ActivityException> activityExceptions)
         {
             Timestamp = DateTime.UtcNow;
 
             TrackingNumber = trackingNumber;
+            ActivityExceptions = activityExceptions;
+        }
+
+        public RoutingSlipFaultedMessage(Guid trackingNumber, ActivityException activityException)
+        {
+            Timestamp = DateTime.UtcNow;
+
+            TrackingNumber = trackingNumber;
+            ActivityExceptions = new List<ActivityException>();
+            ActivityExceptions.Add(activityException);
         }
 
         public Guid TrackingNumber { get; private set; }
         public DateTime Timestamp { get; private set; }
+        public IList<ActivityException> ActivityExceptions { get; private set; }
     }
 }

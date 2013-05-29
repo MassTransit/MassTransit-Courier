@@ -57,6 +57,53 @@ namespace MassTransit.Courier.Tests
         }
 
         [Test]
+        public void Should_capture_a_thrown_exception()
+        {
+            var handled = new ManualResetEvent(false);
+
+            LocalBus.SubscribeHandler<RoutingSlipFaulted>(message => { handled.Set(); });
+
+            Assert.IsTrue(WaitForSubscription<RoutingSlipFaulted>());
+
+            ActivityTestContext faultActivity = GetActivityContext<NastyFaultyActivity>();
+
+            var builder = new RoutingSlipBuilder(Guid.NewGuid());
+            builder.AddActivity(faultActivity.Name, faultActivity.ExecuteUri);
+
+            LocalBus.Execute(builder.Build());
+
+            Assert.IsTrue(handled.WaitOne(Debugger.IsAttached ? 5.Minutes() : 30.Seconds()));
+        }
+
+        [Test]
+        public void Should_compensate_both_activities()
+        {
+            var handled = new ManualResetEvent(false);
+
+            LocalBus.SubscribeHandler<RoutingSlipFaulted>(message => { handled.Set(); });
+
+            Assert.IsTrue(WaitForSubscription<RoutingSlipFaulted>());
+
+            ActivityTestContext testActivity = GetActivityContext<TestActivity>();
+            ActivityTestContext faultActivity = GetActivityContext<NastyFaultyActivity>();
+
+            var builder = new RoutingSlipBuilder(Guid.NewGuid());
+            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new
+            {
+                Value = "Hello Again!",
+            });
+            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new
+            {
+                Value = "Hello Again!",
+            });
+            builder.AddActivity(faultActivity.Name, faultActivity.ExecuteUri);
+
+            LocalBus.Execute(builder.Build());
+
+            Assert.IsTrue(handled.WaitOne(Debugger.IsAttached ? 5.Minutes() : 30.Seconds()));
+        }
+
+        [Test]
         public void Should_handle_the_failed_to_compensate_event()
         {
             var handledCompensationFailure = new ManualResetEvent(false);
@@ -90,6 +137,7 @@ namespace MassTransit.Courier.Tests
             AddActivityContext<SecondTestActivity, TestArguments, TestLog>(() => new SecondTestActivity());
             AddActivityContext<FaultyCompensateActivity, TestArguments, TestLog>(() => new FaultyCompensateActivity());
             AddActivityContext<FaultyActivity, FaultyArguments, FaultyLog>(() => new FaultyActivity());
+            AddActivityContext<NastyFaultyActivity, FaultyArguments, FaultyLog>(() => new NastyFaultyActivity());
         }
     }
 }

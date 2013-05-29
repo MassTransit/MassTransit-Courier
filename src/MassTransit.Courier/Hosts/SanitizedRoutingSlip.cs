@@ -36,12 +36,25 @@ namespace MassTransit.Courier.Hosts
                 ActivityLogs = routingSlip.ActivityLogs.Select(x => (ActivityLog)new SanitizedActivityLog(x)).ToList();
 
             Variables = routingSlip.Variables ?? new Dictionary<string, string>();
+
+            if (routingSlip.ActivityExceptions == null)
+                ActivityExceptions = new List<ActivityException>();
+            else
+            {
+                ActivityExceptions =
+                    routingSlip.ActivityExceptions.Select(x => (ActivityException)new SanitizedActivityException(x))
+                               .ToList();
+            }
+
+            ActivityExceptions = routingSlip.ActivityExceptions ?? new List<ActivityException>();
         }
+
 
         public Guid TrackingNumber { get; private set; }
         public IList<Activity> Itinerary { get; private set; }
         public IList<ActivityLog> ActivityLogs { get; private set; }
         public IDictionary<string, string> Variables { get; private set; }
+        public IList<ActivityException> ActivityExceptions { get; private set; }
 
 
         class SanitizedActivity :
@@ -85,6 +98,29 @@ namespace MassTransit.Courier.Hosts
             public string Name { get; private set; }
             public Uri CompensateAddress { get; private set; }
             public IDictionary<string, string> Results { get; private set; }
+        }
+
+
+        class SanitizedActivityException :
+            ActivityException
+        {
+            public SanitizedActivityException(ActivityException activityException)
+            {
+                if (string.IsNullOrEmpty(activityException.Name))
+                    throw new SerializationException("An Activity Name is required");
+                if (activityException.HostAddress == null)
+                    throw new SerializationException("An Activity HostAddress is required");
+                if (activityException.ExceptionInfo == null)
+                    throw new SerializationException("An Activity ExceptionInfo is required");
+
+                Name = activityException.Name;
+                HostAddress = activityException.HostAddress;
+                ExceptionInfo = activityException.ExceptionInfo;
+            }
+
+            public string Name { get; private set; }
+            public Uri HostAddress { get; private set; }
+            public ExceptionInfo ExceptionInfo { get; private set; }
         }
     }
 }

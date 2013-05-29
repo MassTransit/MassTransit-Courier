@@ -17,12 +17,18 @@ namespace MassTransit.Courier
     using System.Linq;
     using Contracts;
     using Hosts;
+    using InternalMessages;
     using Magnum.Reflection;
 
 
+    /// <summary>
+    /// A RoutingSlipBuilder is used to create a routing slip with proper validation that the resulting RoutingSlip
+    /// is valid.
+    /// </summary>
     public class RoutingSlipBuilder
     {
         public static readonly IDictionary<string, string> NoArguments = new Dictionary<string, string>();
+        readonly IList<ActivityException> _activityExceptions;
 
         readonly IList<ActivityLog> _activityLogs;
         readonly IList<Activity> _itinerary;
@@ -35,39 +41,67 @@ namespace MassTransit.Courier
             _itinerary = new List<Activity>();
             _activityLogs = new List<ActivityLog>();
             _variables = new Dictionary<string, string>();
+            _activityExceptions = new List<ActivityException>();
         }
 
         public RoutingSlipBuilder(Guid trackingNumber, IEnumerable<Activity> activities,
-            IEnumerable<ActivityLog> activityLogs, IDictionary<string, string> variables)
+            IEnumerable<ActivityLog> activityLogs, IDictionary<string, string> variables,
+            IEnumerable<ActivityException> activityExceptions)
         {
             _trackingNumber = trackingNumber;
             _itinerary = activities.ToList();
             _activityLogs = activityLogs.ToList();
             _variables = variables ?? new Dictionary<string, string>();
+            _activityExceptions = activityExceptions.ToList();
         }
 
+        /// <summary>
+        /// The tracking number of the routing slip
+        /// </summary>
         public Guid TrackingNumber
         {
             get { return _trackingNumber; }
         }
 
+        /// <summary>
+        /// Builds the routing slip using the current state of the builder
+        /// </summary>
+        /// <returns>The RoutingSlip</returns>
         public RoutingSlip Build()
         {
-            return new RoutingSlipImpl(TrackingNumber, _itinerary, _activityLogs, _variables);
+            return new RoutingSlipImpl(TrackingNumber, _itinerary, _activityLogs, _variables, _activityExceptions);
         }
 
+        /// <summary>
+        /// Adds an activity to the routing slip without specifying any arguments
+        /// </summary>
+        /// <param name="name">The activity name</param>
+        /// <param name="executeAddress">The execution address of the activity</param>
         public void AddActivity(string name, Uri executeAddress)
         {
             Activity activity = new ActivityImpl(name, executeAddress, NoArguments);
             _itinerary.Add(activity);
         }
 
+        /// <summary>
+        /// Adds an activity to the routing slip specifying activity arguments as an anonymous object
+        /// </summary>
+        /// <param name="name">The activity name</param>
+        /// <param name="executeAddress">The execution address of the activity</param>
+        /// <param name="arguments">An anonymous object of properties matching the argument names of the activity</param>
         public void AddActivity(string name, Uri executeAddress, object arguments)
         {
-            Activity activity = new ActivityImpl(name, executeAddress, GetObjectAsDictionary(arguments));
-            _itinerary.Add(activity);
+            var argumentsDictionary = GetObjectAsDictionary(arguments);
+
+            AddActivity(name, executeAddress, argumentsDictionary);
         }
 
+        /// <summary>
+        /// Adds an activity to the routing slip specifying activity arguments a dictionary
+        /// </summary>
+        /// <param name="name">The activity name</param>
+        /// <param name="executeAddress">The execution address of the activity</param>
+        /// <param name="arguments">A dictionary of name/values matching the activity argument properties</param>
         public void AddActivity(string name, Uri executeAddress, IDictionary<string, string> arguments)
         {
             Activity activity = new ActivityImpl(name, executeAddress, arguments);
@@ -76,13 +110,10 @@ namespace MassTransit.Courier
 
         public ActivityLog AddActivityLog(string name, Uri compensateAddress, object logObject)
         {
-            Guid activityTrackingNumber = NewId.NextGuid();
-            IDictionary<string, string> results = GetObjectAsDictionary(logObject);
+            IDictionary<string, string> resultsDictionary = GetObjectAsDictionary(logObject);
 
-            ActivityLog activityLog = new ActivityLogImpl(activityTrackingNumber, name, compensateAddress, results);
-            _activityLogs.Add(activityLog);
+            return AddActivityLog(name, compensateAddress, resultsDictionary);
 
-            return activityLog;
         }
 
         public ActivityLog AddActivityLog(string name, Uri compensateAddress, IDictionary<string, string> results)
@@ -95,14 +126,32 @@ namespace MassTransit.Courier
             return activityLog;
         }
 
+        /// <summary>
+        /// Adds an activity exception to the routing slip
+        /// </summary>
+        /// <param name="name">The name of the faulted activity</param>
+        /// <param name="hostAddress">The host address where the faulted activity executed</param>
+        /// <param name="exception">The exception thrown by the activity</param>
+        /// <returns>The ActivityExceptionInfo that was added</returns>
+        public ActivityException AddActivityException(string name, Uri hostAddress, Exception exception)
+        {
+            ActivityException activityException = new ActivityExceptionImpl(name, hostAddress, exception);
+            _activityExceptions.Add(activityException);
+
+            return activityException;
+        }
+
         public void AddVariable(string key, string value)
         {
             _variables.Add(key, value);
         }
 
+
         /// <summary>
         /// Sets the value of any existing variables to the value in the anonymous object,
         /// as well as adding any additional variables that did not exist previously.
+        /// 
+        /// For example, SetVariables(new { IntValue = 27, StringValue = "Hello, World." });
         /// </summary>
         /// <param name="values"></param>
         public void SetVariables(object values)
@@ -112,10 +161,12 @@ namespace MassTransit.Courier
             ApplyDictionaryToVariables(dictionary);
         }
 
+
         public void SetVariables(IEnumerable<KeyValuePair<string, string>> values)
         {
             ApplyDictionaryToVariables(values);
         }
+
 
         void ApplyDictionaryToVariables(IEnumerable<KeyValuePair<string, string>> logValues)
         {
@@ -128,11 +179,28 @@ namespace MassTransit.Courier
             }
         }
 
+
         IDictionary<string, string> GetObjectAsDictionary(object values)
         {
             IDictionary<string, object> dictionary = Statics.Converter.Convert(values);
 
             return dictionary.ToDictionary(x => x.Key, x => x.Value.ToString());
+        }
+
+
+        class ActivityExceptionImpl :
+            ActivityException
+        {
+            public ActivityExceptionImpl(string name, Uri hostAddress, Exception exception)
+            {
+                Name = name;
+                HostAddress = hostAddress;
+                ExceptionInfo = new ExceptionInfoImpl(exception);
+            }
+
+            public string Name { get; private set; }
+            public Uri HostAddress { get; private set; }
+            public ExceptionInfo ExceptionInfo { get; private set; }
         }
 
 

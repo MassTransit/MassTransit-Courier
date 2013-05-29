@@ -28,11 +28,15 @@ namespace MassTransit.Courier.InternalMessages
             Source = exception.Source;
             Message = exception.Message;
             StackTrace = exception.StackTrace;
+
+            ExceptionInfo = new ExceptionInfoImpl(exception);
         }
+
 
         public Guid TrackingNumber { get; private set; }
         public DateTime Timestamp { get; private set; }
         public string ActivityName { get; private set; }
+        public ExceptionInfo ExceptionInfo { get; private set; }
         public string Source { get; private set; }
         public string Message { get; private set; }
         public string StackTrace { get; private set; }

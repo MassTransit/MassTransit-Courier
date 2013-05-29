@@ -52,7 +52,7 @@ namespace MassTransit.Courier.Hosts
         public CompensationResult Compensated()
         {
             var builder = new RoutingSlipBuilder(_routingSlip.TrackingNumber, _routingSlip.Itinerary,
-                _routingSlip.ActivityLogs.SkipLast(), _routingSlip.Variables);
+                _routingSlip.ActivityLogs.SkipLast(), _routingSlip.Variables, _routingSlip.ActivityExceptions);
 
             return Compensated(builder.Build());
         }
@@ -79,18 +79,17 @@ namespace MassTransit.Courier.Hosts
 
             if (routingSlip.IsRunning())
             {
-                IEndpoint endpoint = _context.Bus.GetEndpoint(routingSlip.GetLastCompensateAddress());
+                IEndpoint endpoint = _context.Bus.GetEndpoint(routingSlip.GetNextCompensateAddress());
 
                 endpoint.Forward(_context, routingSlip);
 
                 return new CompensatedResult();
             }
 
-            _context.Bus.Publish(new RoutingSlipFaultedMessage(routingSlip.TrackingNumber));
+            _context.Bus.Publish(new RoutingSlipFaultedMessage(routingSlip.TrackingNumber,routingSlip.ActivityExceptions));
 
             return new FaultedResult();
         }
-
 
         static RoutingSlip Sanitize(RoutingSlip message)
         {

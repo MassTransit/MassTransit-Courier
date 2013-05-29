@@ -10,10 +10,14 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Courier
+namespace MassTransit.Courier.Contracts
 {
-    public interface ExecutionResult
+    public interface ExceptionInfo
     {
-        void Evaluate();
+        string ExceptionTypeName { get; }
+        ExceptionInfo InnerException { get; }
+        string StackTrace { get; }
+        string Message { get; }
+        string Source { get; }
     }
 }

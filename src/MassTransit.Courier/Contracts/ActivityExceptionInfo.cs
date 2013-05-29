@@ -10,10 +10,28 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Courier
+namespace MassTransit.Courier.Contracts
 {
-    public interface ExecutionResult
+    using System;
+
+    /// <summary>
+    /// Capture the exception information thrown by an activity
+    /// </summary>
+    public interface ActivityException
     {
-        void Evaluate();
+        /// <summary>
+        /// The name of the activity that caused the exception
+        /// </summary>
+        string Name { get; }
+
+        /// <summary>
+        /// The address of the host that the exception was thrown from
+        /// </summary>
+        Uri HostAddress { get; }
+
+        /// <summary>
+        /// The exception details
+        /// </summary>
+        ExceptionInfo ExceptionInfo { get; }
     }
 }

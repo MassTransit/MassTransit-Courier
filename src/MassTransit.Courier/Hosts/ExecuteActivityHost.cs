@@ -46,13 +46,27 @@ namespace MassTransit.Courier.Hosts
 
             try
             {
-                TActivity activity = _activityFactory(execution.Arguments);
+                ExecutionResult result = ExecuteActivity(execution);
 
-                ExecutionResult result = activity.Execute(execution);
+                result.Evaluate();
             }
             catch (Exception ex)
             {
-                execution.Faulted(ex);
+                _log.Error("The activity threw an unexpected exception", ex);
+            }
+        }
+
+        ExecutionResult ExecuteActivity(HostExecution<TArguments> execution)
+        {
+            try
+            {
+                TActivity activity = _activityFactory(execution.Arguments);
+
+                return activity.Execute(execution);
+            }
+            catch (Exception ex)
+            {
+                return execution.Faulted(ex);
             }
         }
     }

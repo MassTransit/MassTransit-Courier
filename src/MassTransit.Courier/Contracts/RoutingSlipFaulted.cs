@@ -13,6 +13,7 @@
 namespace MassTransit.Courier.Contracts
 {
     using System;
+    using System.Collections.Generic;
 
 
     /// <summary>
@@ -29,5 +30,10 @@ namespace MassTransit.Courier.Contracts
         /// The date/time when the routing slip compensation was finished
         /// </summary>
         DateTime Timestamp { get; }
+
+        /// <summary>
+        /// The exception information from the faulting activities
+        /// </summary>
+        IList<ActivityException> ActivityExceptions { get; }
     }
 }

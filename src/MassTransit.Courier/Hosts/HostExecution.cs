@@ -16,8 +16,6 @@ namespace MassTransit.Courier.Hosts
     using System.Collections.Generic;
     using System.Linq;
     using Contracts;
-    using Extensions;
-    using InternalMessages;
     using Magnum.Reflection;
 
 
@@ -29,7 +27,6 @@ namespace MassTransit.Courier.Hosts
         readonly Uri _compensationAddress;
         readonly IConsumeContext<RoutingSlip> _context;
         readonly RoutingSlip _routingSlip;
-
 
         public HostExecution(IConsumeContext<RoutingSlip> context, Uri compensationAddress)
         {
@@ -95,28 +92,16 @@ namespace MassTransit.Courier.Hosts
 
         public ExecutionResult Faulted(Exception exception)
         {
-            _context.Bus.Publish(new RoutingSlipActivityFaultedMessage(_routingSlip.TrackingNumber, _activity.Name,
-                exception));
-
             if (_routingSlip.IsRunning())
-            {
-                IEndpoint endpoint = _context.Bus.GetEndpoint(_routingSlip.GetLastCompensateAddress());
+                return new CompensateResult(_context, _routingSlip, _activity, exception);
 
-                endpoint.Forward(_context, _routingSlip);
-
-                return new CompensateResult();
-            }
-
-            _context.Bus.Publish(new RoutingSlipFaultedMessage(_routingSlip.TrackingNumber));
-
-            return new FaultedResult();
+            return new FaultResult(_context.Bus, _routingSlip.TrackingNumber, _activity, exception);
         }
 
         RoutingSlipBuilder CreateRoutingSlipBuilder<TLog>(TLog log, out ActivityLog activityLog)
             where TLog : class
         {
             RoutingSlipBuilder builder = CreateRoutingSlipBuilder();
-
             activityLog = builder.AddActivityLog(_activity.Name, _compensationAddress, log);
 
             return builder;
@@ -125,26 +110,19 @@ namespace MassTransit.Courier.Hosts
         RoutingSlipBuilder CreateRoutingSlipBuilder()
         {
             return new RoutingSlipBuilder(_routingSlip.TrackingNumber, _routingSlip.Itinerary.Skip(1),
-                _routingSlip.ActivityLogs, _routingSlip.Variables);
+                _routingSlip.ActivityLogs, _routingSlip.Variables, _routingSlip.ActivityExceptions);
         }
 
-        ExecutionResult Complete(RoutingSlip routingSlip, Guid activityTrackingNumber, IDictionary<string, string> results)
+        ExecutionResult Complete(RoutingSlip routingSlip, Guid activityTrackingNumber,
+            IDictionary<string, string> results)
         {
-            _context.Bus.Publish(new RoutingSlipActivityCompletedMessage(routingSlip.TrackingNumber,
-                activityTrackingNumber, _activity.Name, results, routingSlip.Variables));
-
             if (routingSlip.RanToCompletion())
             {
-                _context.Bus.Publish(new RoutingSlipCompletedMessage(routingSlip.TrackingNumber, routingSlip.Variables));
-
-                return new RanToCompletionResult();
+                return new RanToCompletionResult(_context.Bus, routingSlip, _activity.Name, activityTrackingNumber,
+                    results);
             }
 
-            IEndpoint endpoint = _context.Bus.GetEndpoint(routingSlip.GetNextExecuteAddress());
-
-            endpoint.Forward(_context, routingSlip);
-
-            return new NextActivityResult();
+            return new NextActivityResult(_context, routingSlip, _activity.Name, activityTrackingNumber, results);
         }
 
         static RoutingSlip Sanitize(RoutingSlip message)
@@ -159,30 +137,6 @@ namespace MassTransit.Courier.Hosts
                 initializer[argument.Key] = argument.Value;
 
             return InterfaceImplementationExtensions.InitializeProxy<TArguments>(initializer);
-        }
-
-
-        class CompensateResult :
-            ExecutionResult
-        {
-        }
-
-
-        class FaultedResult :
-            ExecutionResult
-        {
-        }
-
-
-        class NextActivityResult :
-            ExecutionResult
-        {
-        }
-
-
-        class RanToCompletionResult :
-            ExecutionResult
-        {
         }
     }
 }
