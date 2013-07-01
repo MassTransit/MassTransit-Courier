@@ -12,14 +12,10 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Courier
 {
-    public interface CompensateActivity<in TLog>
+    public interface CompensateActivityFactory<TActivity, in TLog>
+        where TActivity : CompensateActivity<TLog>
         where TLog : class
     {
-        /// <summary>
-        /// Compensate the activity and return the remaining compensation items
-        /// </summary>
-        /// <param name="compensation">The compensation information for the activity</param>
-        /// <returns></returns>
-        CompensationResult Compensate(Compensation<TLog> compensation);
+        CompensationResult CompensateActivity(Compensation<TLog> compensation);
     }
 }

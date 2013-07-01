@@ -38,8 +38,7 @@ namespace MassTransit.Courier.Tests
 
                     x.Subscribe(s =>
                         {
-                            s.ExecuteActivityHost<TestActivity, TestArguments>(compensateUri,
-                                _ => new TestActivity());
+                            s.ExecuteActivityHost<TestActivity, TestArguments>(compensateUri);
                         });
                 });
         }

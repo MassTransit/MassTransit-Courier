@@ -19,41 +19,83 @@ namespace MassTransit.Courier
 
     public static class HostSubscriptionExtensions
     {
-        public static InstanceSubscriptionConfigurator ExecuteActivityHost<TController, TArguments>(
+        public static InstanceSubscriptionConfigurator ExecuteActivityHost<TActivity, TArguments>(
             this SubscriptionBusServiceConfigurator configurator,
-            Uri compensateAddress, Func<TController> controllerFactory)
-            where TController : ExecuteActivity<TArguments>
+            Uri compensateAddress)
+            where TActivity : ExecuteActivity<TArguments>, new()
             where TArguments : class
         {
-            return ExecuteActivityHost<TController, TArguments>(configurator, compensateAddress,
+            return ExecuteActivityHost(configurator, compensateAddress,
+                DefaultConstructorExecuteActivityFactory<TActivity, TArguments>.ExecuteFactory);
+        }
+
+        public static InstanceSubscriptionConfigurator ExecuteActivityHost<TActivity, TArguments>(
+            this SubscriptionBusServiceConfigurator configurator,
+            Uri compensateAddress, Func<TActivity> controllerFactory)
+            where TActivity : ExecuteActivity<TArguments>
+            where TArguments : class
+        {
+            return ExecuteActivityHost<TActivity, TArguments>(configurator, compensateAddress,
                 _ => controllerFactory());
         }
 
-        public static InstanceSubscriptionConfigurator ExecuteActivityHost<TController, TArguments>(
+        public static InstanceSubscriptionConfigurator ExecuteActivityHost<TActivity, TArguments>(
             this SubscriptionBusServiceConfigurator configurator,
-            Uri compensateAddress, Func<TArguments, TController> controllerFactory)
-            where TController : ExecuteActivity<TArguments>
+            Uri compensateAddress, Func<TArguments, TActivity> controllerFactory)
+            where TActivity : ExecuteActivity<TArguments>
             where TArguments : class
         {
-            var host = new ExecuteActivityHost<TController, TArguments>(compensateAddress, controllerFactory);
+            var factory = new FactoryMethodExecuteActivityFactory<TActivity, TArguments>(controllerFactory);
+            var host = new ExecuteActivityHost<TActivity, TArguments>(compensateAddress, factory);
 
             return configurator.Instance(host);
         }
 
-        public static InstanceSubscriptionConfigurator CompensateActivityHost<TController, TLog>(
-            this SubscriptionBusServiceConfigurator configurator, Func<TController> controllerFactory)
-            where TController : CompensateActivity<TLog>
-            where TLog : class
+        public static InstanceSubscriptionConfigurator ExecuteActivityHost<TActivity, TArguments>(
+            this SubscriptionBusServiceConfigurator configurator,
+            Uri compensateAddress, ExecuteActivityFactory<TActivity, TArguments> factory)
+            where TActivity : ExecuteActivity<TArguments>
+            where TArguments : class
         {
-            return CompensateActivityHost<TController, TLog>(configurator, _ => controllerFactory());
+            var host = new ExecuteActivityHost<TActivity, TArguments>(compensateAddress, factory);
+
+            return configurator.Instance(host);
         }
 
-        public static InstanceSubscriptionConfigurator CompensateActivityHost<TController, TLog>(
-            this SubscriptionBusServiceConfigurator configurator, Func<TLog, TController> controllerFactory)
-            where TController : CompensateActivity<TLog>
+        public static InstanceSubscriptionConfigurator CompensateActivityHost<TActivity, TLog>(
+            this SubscriptionBusServiceConfigurator configurator)
+            where TActivity : CompensateActivity<TLog>, new()
             where TLog : class
         {
-            var host = new CompensateActivityHost<TController, TLog>(controllerFactory);
+            return CompensateActivityHost(configurator,
+                DefaultConstructorCompensateActivityFactory<TActivity, TLog>.CompensateFactory);
+        }
+
+        public static InstanceSubscriptionConfigurator CompensateActivityHost<TActivity, TLog>(
+            this SubscriptionBusServiceConfigurator configurator, Func<TActivity> controllerFactory)
+            where TActivity : CompensateActivity<TLog>
+            where TLog : class
+        {
+            return CompensateActivityHost<TActivity, TLog>(configurator, _ => controllerFactory());
+        }
+
+        public static InstanceSubscriptionConfigurator CompensateActivityHost<TActivity, TLog>(
+            this SubscriptionBusServiceConfigurator configurator, Func<TLog, TActivity> controllerFactory)
+            where TActivity : CompensateActivity<TLog>
+            where TLog : class
+        {
+            var factory = new FactoryMethodCompensateActivityFactory<TActivity, TLog>(controllerFactory);
+            var host = new CompensateActivityHost<TActivity, TLog>(factory);
+
+            return configurator.Instance(host);
+        }
+
+        public static InstanceSubscriptionConfigurator CompensateActivityHost<TActivity, TLog>(
+            this SubscriptionBusServiceConfigurator configurator, CompensateActivityFactory<TActivity, TLog> factory)
+            where TActivity : CompensateActivity<TLog>
+            where TLog : class
+        {
+            var host = new CompensateActivityHost<TActivity, TLog>(factory);
 
             return configurator.Instance(host);
         }

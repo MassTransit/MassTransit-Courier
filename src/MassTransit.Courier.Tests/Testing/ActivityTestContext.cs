@@ -14,6 +14,7 @@ namespace MassTransit.Courier.Tests.Testing
 {
     using System;
     using BusConfigurators;
+    using Hosts;
     using Subscriptions.Coordinator;
 
 
@@ -38,13 +39,13 @@ namespace MassTransit.Courier.Tests.Testing
         where TArguments : class
         where TLog : class
     {
-        Func<T> _activityFactory;
+        ActivityFactory<T, TArguments, TLog> _activityFactory;
         SubscriptionLoopback _compensateLoopback;
         SubscriptionLoopback _executeLoopback;
 
         public ActivityTestContext(Uri baseUri, Func<T> activityFactory)
         {
-            _activityFactory = activityFactory;
+            _activityFactory = new FactoryMethodActivityFactory<T,TArguments,TLog>(_ => activityFactory(), _ => activityFactory());
 
             Name = GetActivityName();
 

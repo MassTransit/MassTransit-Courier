@@ -38,7 +38,7 @@ namespace MassTransit.Courier.Tests
             var compensateAddress = new Uri("loopback://localhost/compensate_test");
 
             _host = new ExecuteActivityHost<TestActivity, TestArguments>(compensateAddress,
-                _ => new TestActivity());
+                new FactoryMethodExecuteActivityFactory<TestActivity, TestArguments>(_ => new TestActivity()));
 
             _bus = ServiceBusFactory.New(x =>
                 {
@@ -89,7 +89,8 @@ namespace MassTransit.Courier.Tests
                                                    return
                                                        new ExecuteActivityHost<TestActivity, TestArguments>(
                                                            compensateAddress,
-                                                           _ => new TestActivity());
+                                                           new FactoryMethodExecuteActivityFactory
+                                                               <TestActivity, TestArguments>(_ => new TestActivity()));
                                                });
 
                                        var builder = new RoutingSlipBuilder(Guid.NewGuid());

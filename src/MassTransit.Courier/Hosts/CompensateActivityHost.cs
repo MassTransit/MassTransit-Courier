@@ -22,10 +22,10 @@ namespace MassTransit.Courier.Hosts
         where TActivity : CompensateActivity<TLog>
         where TLog : class
     {
-        readonly Func<TLog, TActivity> _activityFactory;
+        readonly CompensateActivityFactory<TActivity, TLog> _activityFactory;
         readonly ILog _log = Logger.Get<CompensateActivityHost<TActivity, TLog>>();
 
-        public CompensateActivityHost(Func<TLog, TActivity> activityFactory)
+        public CompensateActivityHost(CompensateActivityFactory<TActivity, TLog> activityFactory)
         {
             _activityFactory = activityFactory;
         }
@@ -35,14 +35,14 @@ namespace MassTransit.Courier.Hosts
             var compensation = new HostCompensation<TLog>(context);
 
             if (_log.IsDebugEnabled)
+            {
                 _log.DebugFormat("Host: {0} Compensating: {1}", context.Bus.Endpoint.Address,
                     compensation.TrackingNumber);
+            }
 
             try
             {
-                TActivity activity = _activityFactory(compensation.Log);
-
-                CompensationResult result = activity.Compensate(compensation);
+                CompensationResult result = _activityFactory.CompensateActivity(compensation);
             }
             catch (Exception ex)
             {

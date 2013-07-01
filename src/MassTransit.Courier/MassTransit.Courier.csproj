@@ -43,6 +43,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ActivityFactoryExtensions.cs" />
     <Compile Include="Contracts\ActivityException.cs" />
     <Compile Include="Contracts\ExceptionInfo.cs" />
     <Compile Include="Contracts\RoutingSlipActivityCompensated.cs" />
@@ -51,9 +52,18 @@
     <Compile Include="Contracts\RoutingSlipActivityFaulted.cs" />
     <Compile Include="Contracts\RoutingSlipCompensationFailed.cs" />
     <Compile Include="Hosts\CompensateResult.cs" />
+    <Compile Include="Hosts\DefaultConstructorActivityFactory.cs" />
+    <Compile Include="Hosts\DefaultConstructorCompensateActivityFactory.cs" />
+    <Compile Include="Hosts\FactoryMethodActivityFactory.cs" />
+    <Compile Include="Hosts\FactoryMethodCompensateActivityFactory.cs" />
+    <Compile Include="Hosts\FactoryMethodExecuteActivityFactory.cs" />
     <Compile Include="Hosts\FaultResult.cs" />
+    <Compile Include="Hosts\GenericActivityFactory.cs" />
     <Compile Include="Hosts\NextActivityResult.cs" />
     <Compile Include="Hosts\RanToCompletionResult.cs" />
+    <Compile Include="ActivityFactory.cs" />
+    <Compile Include="CompensateActivityFactory.cs" />
+    <Compile Include="ExecuteActivityFactory.cs" />
     <Compile Include="InternalMessages\ExceptionInfoImpl.cs" />
     <Compile Include="Internals\**\*.cs" />
   </ItemGroup>
