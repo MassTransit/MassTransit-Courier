@@ -108,18 +108,16 @@ namespace MassTransit.Courier
             _itinerary.Add(activity);
         }
 
-        public ActivityLog AddActivityLog(string name, Uri compensateAddress, object logObject)
+        public ActivityLog AddActivityLog(string name, Guid activityTrackingNumber, Uri compensateAddress, object logObject)
         {
             IDictionary<string, string> resultsDictionary = GetObjectAsDictionary(logObject);
 
-            return AddActivityLog(name, compensateAddress, resultsDictionary);
+            return AddActivityLog(name, activityTrackingNumber, compensateAddress, resultsDictionary);
 
         }
 
-        public ActivityLog AddActivityLog(string name, Uri compensateAddress, IDictionary<string, string> results)
+        public ActivityLog AddActivityLog(string name, Guid activityTrackingNumber, Uri compensateAddress, IDictionary<string, string> results)
         {
-            Guid activityTrackingNumber = NewId.NextGuid();
-
             ActivityLog activityLog = new ActivityLogImpl(activityTrackingNumber, name, compensateAddress, results);
             _activityLogs.Add(activityLog);
 
@@ -184,7 +182,7 @@ namespace MassTransit.Courier
         {
             IDictionary<string, object> dictionary = Statics.Converter.Convert(values);
 
-            return dictionary.ToDictionary(x => x.Key, x => x.Value.ToString());
+            return dictionary.ToDictionary(x => x.Key, x => x.Value != null ? x.Value.ToString() : null);
         }
 
 

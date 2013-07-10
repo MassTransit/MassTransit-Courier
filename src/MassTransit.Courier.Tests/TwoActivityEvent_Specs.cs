@@ -115,12 +115,14 @@ namespace MassTransit.Courier.Tests
             builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new
                 {
                     Value = "Hello",
+                    NullValue = (string)null,
                 });
 
             testActivity = GetActivityContext<SecondTestActivity>();
             builder.AddActivity(testActivity.Name, testActivity.ExecuteUri);
 
             builder.AddVariable("Variable", "Knife");
+            builder.AddVariable("Nothing", null);
 
             _routingSlip = builder.Build();
 

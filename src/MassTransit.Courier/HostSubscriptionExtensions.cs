@@ -25,7 +25,7 @@ namespace MassTransit.Courier
             where TActivity : ExecuteActivity<TArguments>, new()
             where TArguments : class
         {
-            return ExecuteActivityHost(configurator, compensateAddress,
+            return ExecuteActivityHost<TActivity, TArguments>(configurator, compensateAddress,
                 DefaultConstructorExecuteActivityFactory<TActivity, TArguments>.ExecuteFactory);
         }
 
@@ -53,7 +53,7 @@ namespace MassTransit.Courier
 
         public static InstanceSubscriptionConfigurator ExecuteActivityHost<TActivity, TArguments>(
             this SubscriptionBusServiceConfigurator configurator,
-            Uri compensateAddress, ExecuteActivityFactory<TActivity, TArguments> factory)
+            Uri compensateAddress, ExecuteActivityFactory<TArguments> factory)
             where TActivity : ExecuteActivity<TArguments>
             where TArguments : class
         {
@@ -67,7 +67,7 @@ namespace MassTransit.Courier
             where TActivity : CompensateActivity<TLog>, new()
             where TLog : class
         {
-            return CompensateActivityHost(configurator,
+            return CompensateActivityHost<TActivity, TLog>(configurator,
                 DefaultConstructorCompensateActivityFactory<TActivity, TLog>.CompensateFactory);
         }
 
@@ -91,7 +91,7 @@ namespace MassTransit.Courier
         }
 
         public static InstanceSubscriptionConfigurator CompensateActivityHost<TActivity, TLog>(
-            this SubscriptionBusServiceConfigurator configurator, CompensateActivityFactory<TActivity, TLog> factory)
+            this SubscriptionBusServiceConfigurator configurator, CompensateActivityFactory<TLog> factory)
             where TActivity : CompensateActivity<TLog>
             where TLog : class
         {

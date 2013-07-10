@@ -24,7 +24,11 @@ namespace MassTransit.Courier.Tests.Testing
 
             TestLog log = new TestLogImpl(execution.Arguments.Value);
 
-            return execution.Completed(log, new {Value = "Hello, World!"});
+            return execution.Completed(log, new
+                {
+                    Value = "Hello, World!",
+                    NullValue = (string)null,
+                });
         }
 
         public CompensationResult Compensate(Compensation<TestLog> compensation)

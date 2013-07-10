@@ -27,6 +27,7 @@ namespace MassTransit.Courier.Hosts
         readonly Uri _compensationAddress;
         readonly IConsumeContext<RoutingSlip> _context;
         readonly RoutingSlip _routingSlip;
+        readonly Guid _activityTrackingNumber;
 
         public HostExecution(IConsumeContext<RoutingSlip> context, Uri compensationAddress)
         {
@@ -38,6 +39,7 @@ namespace MassTransit.Courier.Hosts
                 throw new ArgumentException("The routingSlip must contain at least one activity");
 
             _activity = _routingSlip.Itinerary[0];
+            _activityTrackingNumber = NewId.NextGuid();
 
             Arguments = GetActivityArguments(_activity, _routingSlip.Variables);
         }
@@ -49,11 +51,21 @@ namespace MassTransit.Courier.Hosts
             get { return _routingSlip.TrackingNumber; }
         }
 
+        public Guid ActivityTrackingNumber
+        {
+            get { return _activityTrackingNumber; }
+        }
+
+        public IServiceBus Bus
+        {
+            get { return _context.Bus; }
+        }
+
         public ExecutionResult Completed()
         {
             RoutingSlipBuilder builder = CreateRoutingSlipBuilder();
 
-            return Complete(builder.Build(), NewId.NextGuid(), RoutingSlipBuilder.NoArguments);
+            return Complete(builder.Build(), RoutingSlipBuilder.NoArguments);
         }
 
         public ExecutionResult Completed<TLog>(TLog log)
@@ -62,7 +74,7 @@ namespace MassTransit.Courier.Hosts
             ActivityLog activityLog;
             RoutingSlipBuilder builder = CreateRoutingSlipBuilder(log, out activityLog);
 
-            return Complete(builder.Build(), activityLog.ActivityTrackingNumber, activityLog.Results);
+            return Complete(builder.Build(), activityLog.Results);
         }
 
         public ExecutionResult Completed<TLog>(TLog log, object values)
@@ -72,7 +84,7 @@ namespace MassTransit.Courier.Hosts
             RoutingSlipBuilder builder = CreateRoutingSlipBuilder(log, out activityLog);
             builder.SetVariables(values);
 
-            return Complete(builder.Build(), activityLog.ActivityTrackingNumber, activityLog.Results);
+            return Complete(builder.Build(), activityLog.Results);
         }
 
         public ExecutionResult Completed<TLog>(TLog log, IDictionary<string, string> values)
@@ -82,7 +94,7 @@ namespace MassTransit.Courier.Hosts
             RoutingSlipBuilder builder = CreateRoutingSlipBuilder(log, out activityLog);
             builder.SetVariables(values);
 
-            return Complete(builder.Build(), activityLog.ActivityTrackingNumber, activityLog.Results);
+            return Complete(builder.Build(), activityLog.Results);
         }
 
         public ExecutionResult Faulted()
@@ -102,7 +114,7 @@ namespace MassTransit.Courier.Hosts
             where TLog : class
         {
             RoutingSlipBuilder builder = CreateRoutingSlipBuilder();
-            activityLog = builder.AddActivityLog(_activity.Name, _compensationAddress, log);
+            activityLog = builder.AddActivityLog(_activity.Name, _activityTrackingNumber, _compensationAddress, log);
 
             return builder;
         }
@@ -113,16 +125,15 @@ namespace MassTransit.Courier.Hosts
                 _routingSlip.ActivityLogs, _routingSlip.Variables, _routingSlip.ActivityExceptions);
         }
 
-        ExecutionResult Complete(RoutingSlip routingSlip, Guid activityTrackingNumber,
-            IDictionary<string, string> results)
+        ExecutionResult Complete(RoutingSlip routingSlip, IDictionary<string, string> results)
         {
             if (routingSlip.RanToCompletion())
             {
-                return new RanToCompletionResult(_context.Bus, routingSlip, _activity.Name, activityTrackingNumber,
+                return new RanToCompletionResult(_context.Bus, routingSlip, _activity.Name, _activityTrackingNumber,
                     results);
             }
 
-            return new NextActivityResult(_context, routingSlip, _activity.Name, activityTrackingNumber, results);
+            return new NextActivityResult(_context, routingSlip, _activity.Name, _activityTrackingNumber, results);
         }
 
         static RoutingSlip Sanitize(RoutingSlip message)

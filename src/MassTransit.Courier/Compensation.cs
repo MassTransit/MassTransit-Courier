@@ -26,6 +26,11 @@ namespace MassTransit.Courier
         Guid TrackingNumber { get; }
 
         /// <summary>
+        /// The service bus instance where the activity is hosted
+        /// </summary>
+        IServiceBus Bus { get; }
+
+        /// <summary>
         /// The compensation was successful
         /// </summary>
         /// <returns></returns>

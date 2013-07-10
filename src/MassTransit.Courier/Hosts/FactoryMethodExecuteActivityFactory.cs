@@ -16,7 +16,7 @@ namespace MassTransit.Courier.Hosts
 
 
     public class FactoryMethodExecuteActivityFactory<TActivity, TArguments> :
-        ExecuteActivityFactory<TActivity, TArguments>
+        ExecuteActivityFactory<TArguments>
         where TActivity : ExecuteActivity<TArguments>
         where TArguments : class
     {

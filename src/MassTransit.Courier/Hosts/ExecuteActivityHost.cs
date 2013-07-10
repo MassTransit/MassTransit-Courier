@@ -22,11 +22,11 @@ namespace MassTransit.Courier.Hosts
         where TActivity : ExecuteActivity<TArguments>
         where TArguments : class
     {
-        readonly ExecuteActivityFactory<TActivity, TArguments> _activityFactory;
+        readonly ExecuteActivityFactory<TArguments> _activityFactory;
         readonly Uri _compensateAddress;
         readonly ILog _log = Logger.Get<ExecuteActivityHost<TActivity, TArguments>>();
 
-        public ExecuteActivityHost(Uri compensateAddress, ExecuteActivityFactory<TActivity, TArguments> activityFactory)
+        public ExecuteActivityHost(Uri compensateAddress, ExecuteActivityFactory<TArguments> activityFactory)
         {
             if (compensateAddress == null)
                 throw new ArgumentNullException("compensateAddress");

@@ -39,8 +39,8 @@ namespace MassTransit.Courier
 
 
     public interface ActivityFactory<TActivity, in TArguments, in TLog> :
-        ExecuteActivityFactory<TActivity, TArguments>,
-        CompensateActivityFactory<TActivity, TLog>
+        ExecuteActivityFactory<TArguments>,
+        CompensateActivityFactory<TLog>
         where TActivity : ExecuteActivity<TArguments>, CompensateActivity<TLog>
         where TArguments : class
         where TLog : class

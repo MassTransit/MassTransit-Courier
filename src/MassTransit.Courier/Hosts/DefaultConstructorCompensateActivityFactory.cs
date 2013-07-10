@@ -16,7 +16,7 @@ namespace MassTransit.Courier.Hosts
         where TActivity : CompensateActivity<TLog>, new()
         where TLog : class
     {
-        public static CompensateActivityFactory<TActivity, TLog> CompensateFactory
+        public static CompensateActivityFactory<TLog> CompensateFactory
         {
             get { return ActivityFactoryCache.Factory; }
         }
@@ -24,7 +24,7 @@ namespace MassTransit.Courier.Hosts
 
         class ActivityFactoryCache
         {
-            internal static readonly CompensateActivityFactory<TActivity, TLog> Factory =
+            internal static readonly CompensateActivityFactory<TLog> Factory =
                 new FactoryMethodCompensateActivityFactory<TActivity, TLog>(_ => new TActivity());
         }
     }

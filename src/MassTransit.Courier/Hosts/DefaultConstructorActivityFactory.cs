@@ -16,7 +16,7 @@ namespace MassTransit.Courier.Hosts
         where TActivity : ExecuteActivity<TArguments>, new()
         where TArguments : class
     {
-        public static ExecuteActivityFactory<TActivity, TArguments> ExecuteFactory
+        public static ExecuteActivityFactory<TArguments> ExecuteFactory
         {
             get { return ActivityFactoryCache.Factory; }
         }
@@ -24,7 +24,7 @@ namespace MassTransit.Courier.Hosts
 
         class ActivityFactoryCache
         {
-            internal static readonly ExecuteActivityFactory<TActivity, TArguments> Factory =
+            internal static readonly ExecuteActivityFactory<TArguments> Factory =
                 new FactoryMethodExecuteActivityFactory<TActivity, TArguments>(_ => new TActivity());
         }
     }

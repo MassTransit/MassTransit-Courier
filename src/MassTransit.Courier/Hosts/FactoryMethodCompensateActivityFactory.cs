@@ -16,7 +16,7 @@ namespace MassTransit.Courier.Hosts
 
 
     public class FactoryMethodCompensateActivityFactory<TActivity, TLog> :
-        CompensateActivityFactory<TActivity, TLog>
+        CompensateActivityFactory<TLog>
         where TActivity : CompensateActivity<TLog>
         where TLog : class
     {

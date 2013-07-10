@@ -22,10 +22,10 @@ namespace MassTransit.Courier.Hosts
         where TActivity : CompensateActivity<TLog>
         where TLog : class
     {
-        readonly CompensateActivityFactory<TActivity, TLog> _activityFactory;
+        readonly CompensateActivityFactory<TLog> _activityFactory;
         readonly ILog _log = Logger.Get<CompensateActivityHost<TActivity, TLog>>();
 
-        public CompensateActivityHost(CompensateActivityFactory<TActivity, TLog> activityFactory)
+        public CompensateActivityHost(CompensateActivityFactory<TLog> activityFactory)
         {
             _activityFactory = activityFactory;
         }
