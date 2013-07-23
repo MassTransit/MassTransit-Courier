@@ -30,13 +30,13 @@ namespace MassTransit.Courier.Hosts
             _activityFactory = activityFactory;
         }
 
-        public void Consume(IConsumeContext<RoutingSlip> context)
+        void Consumes<IConsumeContext<RoutingSlip>>.All.Consume(IConsumeContext<RoutingSlip> context)
         {
-            var compensation = new HostCompensation<TLog>(context);
+            Compensation<TLog> compensation = new HostCompensation<TLog>(context);
 
             if (_log.IsDebugEnabled)
             {
-                _log.DebugFormat("Host: {0} Compensating: {1}", context.Bus.Endpoint.Address,
+                _log.DebugFormat("Host: {0} Compensating: {1}", compensation.Bus.Endpoint.Address,
                     compensation.TrackingNumber);
             }
 

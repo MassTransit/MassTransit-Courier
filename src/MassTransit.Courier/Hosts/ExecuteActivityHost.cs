@@ -37,12 +37,12 @@ namespace MassTransit.Courier.Hosts
             _activityFactory = activityFactory;
         }
 
-        public void Consume(IConsumeContext<RoutingSlip> context)
+        void Consumes<IConsumeContext<RoutingSlip>>.All.Consume(IConsumeContext<RoutingSlip> context)
         {
-            var execution = new HostExecution<TArguments>(context, _compensateAddress);
+            Execution<TArguments> execution = new HostExecution<TArguments>(context, _compensateAddress);
 
             if (_log.IsDebugEnabled)
-                _log.DebugFormat("Host: {0} Executing: {1}", context.Bus.Endpoint.Address, execution.TrackingNumber);
+                _log.DebugFormat("Host: {0} Executing: {1}", execution.Bus.Endpoint.Address, execution.TrackingNumber);
 
             try
             {
@@ -56,7 +56,7 @@ namespace MassTransit.Courier.Hosts
             }
         }
 
-        ExecutionResult ExecuteActivity(HostExecution<TArguments> execution)
+        ExecutionResult ExecuteActivity(Execution<TArguments> execution)
         {
             try
             {

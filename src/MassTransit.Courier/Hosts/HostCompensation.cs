@@ -28,6 +28,7 @@ namespace MassTransit.Courier.Hosts
         readonly ActivityLog _activityLog;
         readonly IConsumeContext<RoutingSlip> _context;
         readonly RoutingSlip _routingSlip;
+        TLog _log;
 
         public HostCompensation(IConsumeContext<RoutingSlip> context)
         {
@@ -39,22 +40,25 @@ namespace MassTransit.Courier.Hosts
 
             _activityLog = _routingSlip.ActivityLogs.Last();
 
-            Log = GetActivityLog(_activityLog, _routingSlip.Variables);
+            _log = GetActivityLog(_activityLog, _routingSlip.Variables);
         }
 
-        public TLog Log { get; private set; }
+        TLog Compensation<TLog>.Log
+        {
+            get { return _log; }
+        }
 
-        public Guid TrackingNumber
+        Guid Compensation<TLog>.TrackingNumber
         {
             get { return _routingSlip.TrackingNumber; }
         }
 
-        public IServiceBus Bus
+        IServiceBus Compensation<TLog>.Bus
         {
             get { return _context.Bus; }
         }
 
-        public CompensationResult Compensated()
+        CompensationResult Compensation<TLog>.Compensated()
         {
             var builder = new RoutingSlipBuilder(_routingSlip.TrackingNumber, _routingSlip.Itinerary,
                 _routingSlip.ActivityLogs.SkipLast(), _routingSlip.Variables, _routingSlip.ActivityExceptions);
@@ -62,15 +66,44 @@ namespace MassTransit.Courier.Hosts
             return Compensated(builder.Build());
         }
 
-        public CompensationResult Failed()
+        CompensationResult Compensation<TLog>.Compensated(object values)
         {
-            return Failed(new RoutingSlipException("The routing slip compensation failed"));
+            var builder = new RoutingSlipBuilder(_routingSlip.TrackingNumber, _routingSlip.Itinerary,
+                _routingSlip.ActivityLogs.SkipLast(), _routingSlip.Variables, _routingSlip.ActivityExceptions);
+            builder.SetVariables(values);
+
+            return Compensated(builder.Build());
         }
 
-        public CompensationResult Failed(Exception exception)
+        CompensationResult Compensation<TLog>.Compensated(IDictionary<string, string> values)
+        {
+            var builder = new RoutingSlipBuilder(_routingSlip.TrackingNumber, _routingSlip.Itinerary,
+                _routingSlip.ActivityLogs.SkipLast(), _routingSlip.Variables, _routingSlip.ActivityExceptions);
+            builder.SetVariables(values);
+
+            return Compensated(builder.Build());
+        }
+
+        CompensationResult Compensation<TLog>.Failed()
+        {
+            var exception = new RoutingSlipException("The routing slip compensation failed");
+            Failed(exception);
+
+            throw exception;
+        }
+
+        CompensationResult Compensation<TLog>.Failed(Exception exception)
+        {
+            Failed(exception);
+
+            throw exception;
+        }
+
+        void Failed(Exception exception)
         {
             var message = new CompensationFailedMessage(_routingSlip.TrackingNumber, _activityLog.ActivityTrackingNumber,
                 _activityLog.Name, exception);
+
             _context.Bus.Publish(message);
 
             // the exception is thrown so MT will move the routing slip into the error queue
@@ -91,7 +124,8 @@ namespace MassTransit.Courier.Hosts
                 return new CompensatedResult();
             }
 
-            _context.Bus.Publish(new RoutingSlipFaultedMessage(routingSlip.TrackingNumber,routingSlip.ActivityExceptions));
+            _context.Bus.Publish(new RoutingSlipFaultedMessage(routingSlip.TrackingNumber,
+                routingSlip.ActivityExceptions));
 
             return new FaultedResult();
         }

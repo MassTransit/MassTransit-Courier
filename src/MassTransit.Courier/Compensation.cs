@@ -13,6 +13,7 @@
 namespace MassTransit.Courier
 {
     using System;
+    using System.Collections.Generic;
 
 
     public interface Compensation<out TLog>
@@ -35,6 +36,20 @@ namespace MassTransit.Courier
         /// </summary>
         /// <returns></returns>
         CompensationResult Compensated();
+
+        /// <summary>
+        /// The compenstation was successful
+        /// </summary>
+        /// <param name="values">The variables to be updated on the routing slip</param>
+        /// <returns></returns>
+        CompensationResult Compensated(object values);
+
+        /// <summary>
+        /// The compensation was successful
+        /// </summary>
+        /// <param name="values">The variables to be updated on the routing slip</param>
+        /// <returns></returns>
+        CompensationResult Compensated(IDictionary<string,string> values);
 
         /// <summary>
         /// The compensation failed
