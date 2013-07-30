@@ -25,11 +25,11 @@ namespace MassTransit.Courier.Hosts
         readonly Guid _activityTrackingNumber;
         readonly IServiceBus _bus;
         readonly IConsumeContext _context;
-        readonly IDictionary<string, string> _results;
+        readonly IDictionary<string, object> _results;
         readonly RoutingSlip _routingSlip;
 
         public NextActivityResult(IConsumeContext context, RoutingSlip routingSlip, string activityName,
-            Guid activityTrackingNumber, IDictionary<string, string> results)
+            Guid activityTrackingNumber, IDictionary<string, object> results)
         {
             _context = context;
             _routingSlip = routingSlip;

@@ -39,7 +39,7 @@ namespace MassTransit.Courier.Tests.Testing
         where TArguments : class
         where TLog : class
     {
-        ActivityFactory<T, TArguments, TLog> _activityFactory;
+        readonly ActivityFactory<T, TArguments, TLog> _activityFactory;
         SubscriptionLoopback _compensateLoopback;
         SubscriptionLoopback _executeLoopback;
 

@@ -70,7 +70,7 @@ namespace MassTransit.Courier
         /// <param name="log"></param>
         /// <param name="values">An dictionary of values to add/set as variables on the routing slip</param>
         /// <returns></returns>
-        ExecutionResult Completed<TLog>(TLog log, IDictionary<string, string> values)
+        ExecutionResult Completed<TLog>(TLog log, IDictionary<string, object> values)
             where TLog : class;
 
         /// <summary>

@@ -36,6 +36,6 @@ namespace MassTransit.Courier.Contracts
         /// to capture the output of the slip - real events should likely be used for real
         /// completion items but this is useful for some cases
         /// </summary>
-        IDictionary<string, string> Variables { get; }
+        IDictionary<string, object> Variables { get; }
     }
 }

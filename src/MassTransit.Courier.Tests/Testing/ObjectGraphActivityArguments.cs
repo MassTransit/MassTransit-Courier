@@ -10,18 +10,11 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Courier.Contracts
+namespace MassTransit.Courier.Tests.Testing
 {
-    using System;
-    using System.Collections.Generic;
-
-
-    public interface Activity
+    public interface ObjectGraphActivityArguments
     {
-        string Name { get; }
-
-        Uri ExecuteAddress { get; }
-
-        IDictionary<string, object> Arguments { get; }
+        OuterObject Outer { get; }
+        string[] Names { get; }
     }
 }

@@ -41,7 +41,7 @@ namespace MassTransit.Courier.Contracts
         /// <summary>
         /// Variables that are carried with the routing slip for use by any activity
         /// </summary>
-        IDictionary<string, string> Variables { get; }
+        IDictionary<string, object> Variables { get; }
 
         /// <summary>
         /// A list of exceptions that have occurred during routing slip execution

@@ -159,8 +159,8 @@ namespace MassTransit.Courier.Tests.Testing
         protected virtual bool WaitForSubscription<T>()
             where T : class
         {
-            return ActivityTestContexts.Values.All(x => x.ExecuteBus.HasSubscription<T>().Any()
-                                                        && x.CompensateBus.HasSubscription<T>().Any());
+            return ActivityTestContexts.Values.All(x => x.ExecuteBus.HasSubscription<T>(20.Seconds()).Any()
+                                                        && x.CompensateBus.HasSubscription<T>(20.Seconds()).Any());
         }
 
         protected ActivityTestContext GetActivityContext<T>()

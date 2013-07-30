@@ -16,7 +16,6 @@ namespace MassTransit.Courier.Hosts
     using System.Collections.Generic;
     using System.Linq;
     using Contracts;
-    using Magnum.Reflection;
 
 
     public class HostExecution<TArguments> :
@@ -25,24 +24,24 @@ namespace MassTransit.Courier.Hosts
     {
         readonly Activity _activity;
         readonly Guid _activityTrackingNumber;
+        readonly TArguments _arguments;
         readonly Uri _compensationAddress;
         readonly IConsumeContext<RoutingSlip> _context;
-        readonly RoutingSlip _routingSlip;
-        TArguments _arguments;
+        readonly SanitizedRoutingSlip _routingSlip;
 
         public HostExecution(IConsumeContext<RoutingSlip> context, Uri compensationAddress)
         {
             _context = context;
             _compensationAddress = compensationAddress;
 
-            _routingSlip = Sanitize(context.Message);
+            _routingSlip = new SanitizedRoutingSlip(context);
             if (_routingSlip.Itinerary.Count == 0)
                 throw new ArgumentException("The routingSlip must contain at least one activity");
 
-            _activity = _routingSlip.Itinerary[0];
             _activityTrackingNumber = NewId.NextGuid();
 
-            _arguments = GetActivityArguments(_activity, _routingSlip.Variables);
+            _activity = _routingSlip.Itinerary[0];
+            _arguments = _routingSlip.GetActivityArguments<TArguments>();
         }
 
         TArguments Execution<TArguments>.Arguments
@@ -89,7 +88,7 @@ namespace MassTransit.Courier.Hosts
             return Complete(builder.Build(), activityLog.Results);
         }
 
-        ExecutionResult Execution<TArguments>.Completed<TLog>(TLog log, IDictionary<string, string> values)
+        ExecutionResult Execution<TArguments>.Completed<TLog>(TLog log, IDictionary<string, object> values)
         {
             ActivityLog activityLog;
             RoutingSlipBuilder builder = CreateRoutingSlipBuilder(log, out activityLog);
@@ -107,6 +106,7 @@ namespace MassTransit.Courier.Hosts
         {
             return Faulted(exception);
         }
+
 
         ExecutionResult Faulted(Exception exception)
         {
@@ -131,7 +131,7 @@ namespace MassTransit.Courier.Hosts
                 _routingSlip.ActivityLogs, _routingSlip.Variables, _routingSlip.ActivityExceptions);
         }
 
-        ExecutionResult Complete(RoutingSlip routingSlip, IDictionary<string, string> results)
+        ExecutionResult Complete(RoutingSlip routingSlip, IDictionary<string, object> results)
         {
             if (routingSlip.RanToCompletion())
             {
@@ -140,20 +140,6 @@ namespace MassTransit.Courier.Hosts
             }
 
             return new NextActivityResult(_context, routingSlip, _activity.Name, _activityTrackingNumber, results);
-        }
-
-        static RoutingSlip Sanitize(RoutingSlip message)
-        {
-            return new SanitizedRoutingSlip(message);
-        }
-
-        static TArguments GetActivityArguments(Activity activity, IEnumerable<KeyValuePair<string, string>> variables)
-        {
-            IDictionary<string, object> initializer = variables.ToDictionary(x => x.Key, x => (object)x.Value);
-            foreach (var argument in activity.Arguments)
-                initializer[argument.Key] = argument.Value;
-
-            return InterfaceImplementationExtensions.InitializeProxy<TArguments>(initializer);
         }
     }
 }

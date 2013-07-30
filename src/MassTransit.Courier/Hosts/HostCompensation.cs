@@ -27,20 +27,19 @@ namespace MassTransit.Courier.Hosts
     {
         readonly ActivityLog _activityLog;
         readonly IConsumeContext<RoutingSlip> _context;
-        readonly RoutingSlip _routingSlip;
-        TLog _log;
+        readonly SanitizedRoutingSlip _routingSlip;
+        readonly TLog _log;
 
         public HostCompensation(IConsumeContext<RoutingSlip> context)
         {
             _context = context;
 
-            _routingSlip = Sanitize(context.Message);
+            _routingSlip = new SanitizedRoutingSlip(context);
             if (_routingSlip.ActivityLogs.Count == 0)
                 throw new ArgumentException("The routingSlip must contain at least one activity log");
 
             _activityLog = _routingSlip.ActivityLogs.Last();
-
-            _log = GetActivityLog(_activityLog, _routingSlip.Variables);
+            _log = _routingSlip.GetActivityLog<TLog>();
         }
 
         TLog Compensation<TLog>.Log
@@ -75,7 +74,7 @@ namespace MassTransit.Courier.Hosts
             return Compensated(builder.Build());
         }
 
-        CompensationResult Compensation<TLog>.Compensated(IDictionary<string, string> values)
+        CompensationResult Compensation<TLog>.Compensated(IDictionary<string, object> values)
         {
             var builder = new RoutingSlipBuilder(_routingSlip.TrackingNumber, _routingSlip.Itinerary,
                 _routingSlip.ActivityLogs.SkipLast(), _routingSlip.Variables, _routingSlip.ActivityExceptions);
@@ -130,15 +129,10 @@ namespace MassTransit.Courier.Hosts
             return new FaultedResult();
         }
 
-        static RoutingSlip Sanitize(RoutingSlip message)
+        static TLog GetActivityLog(ActivityLog activityLog, IEnumerable<KeyValuePair<string, object>> variables)
         {
-            return new SanitizedRoutingSlip(message);
-        }
-
-        static TLog GetActivityLog(ActivityLog activityLog, IEnumerable<KeyValuePair<string, string>> variables)
-        {
-            IDictionary<string, object> initializer = variables.ToDictionary(x => x.Key, x => (object)x.Value);
-            foreach (var argument in activityLog.Results.Where(x => !string.IsNullOrWhiteSpace(x.Value)))
+            IDictionary<string, object> initializer = variables.ToDictionary(x => x.Key, x => x.Value);
+            foreach (var argument in activityLog.Results.Where(x => x.Value != null))
                 initializer[argument.Key] = argument.Value;
 
             return InterfaceImplementationExtensions.InitializeProxy<TLog>(initializer);

@@ -61,7 +61,7 @@ namespace MassTransit.Courier.Tests
         {
             var handled = new ManualResetEvent(false);
 
-            LocalBus.SubscribeHandler<RoutingSlipFaulted>(message => { handled.Set(); });
+            LocalBus.SubscribeHandler<RoutingSlipFaulted>(message => handled.Set());
 
             Assert.IsTrue(WaitForSubscription<RoutingSlipFaulted>());
 
@@ -80,7 +80,7 @@ namespace MassTransit.Courier.Tests
         {
             var handled = new ManualResetEvent(false);
 
-            LocalBus.SubscribeHandler<RoutingSlipFaulted>(message => { handled.Set(); });
+            LocalBus.SubscribeHandler<RoutingSlipFaulted>(message => handled.Set());
 
             Assert.IsTrue(WaitForSubscription<RoutingSlipFaulted>());
 
@@ -109,8 +109,8 @@ namespace MassTransit.Courier.Tests
             var handledCompensationFailure = new ManualResetEvent(false);
             var handledRoutingSlipFailure = new ManualResetEvent(false);
 
-            LocalBus.SubscribeHandler<RoutingSlipActivityCompensationFailed>(message => { handledCompensationFailure.Set(); });
-            LocalBus.SubscribeHandler<RoutingSlipCompensationFailed>(message => { handledRoutingSlipFailure.Set(); });
+            LocalBus.SubscribeHandler<RoutingSlipActivityCompensationFailed>(message => handledCompensationFailure.Set());
+            LocalBus.SubscribeHandler<RoutingSlipCompensationFailed>(message => handledRoutingSlipFailure.Set());
 
             Assert.IsTrue(WaitForSubscription<RoutingSlipCompensationFailed>());
             Assert.IsTrue(WaitForSubscription<RoutingSlipActivityCompensationFailed>());

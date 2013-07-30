@@ -21,7 +21,7 @@ namespace MassTransit.Courier.InternalMessages
         RoutingSlipActivityCompensated
     {
         public RoutingSlipActivityCompensatedMessage(Guid trackingNumber, Guid activityTrackingNumber,
-            string activityName, IDictionary<string, string> results)
+            string activityName, IDictionary<string, object> results)
         {
             Timestamp = DateTime.UtcNow;
 
@@ -32,7 +32,7 @@ namespace MassTransit.Courier.InternalMessages
         }
 
         public Guid ActivityTrackingNumber { get; private set; }
-        public IDictionary<string, string> Results { get; private set; }
+        public IDictionary<string, object> Results { get; private set; }
         public string ActivityName { get; private set; }
 
         public Guid TrackingNumber { get; private set; }

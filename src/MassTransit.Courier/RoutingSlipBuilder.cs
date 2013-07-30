@@ -27,31 +27,31 @@ namespace MassTransit.Courier
     /// </summary>
     public class RoutingSlipBuilder
     {
-        public static readonly IDictionary<string, string> NoArguments = new Dictionary<string, string>();
+        public static readonly IDictionary<string, object> NoArguments = new Dictionary<string, object>();
         readonly IList<ActivityException> _activityExceptions;
 
         readonly IList<ActivityLog> _activityLogs;
         readonly IList<Activity> _itinerary;
         readonly Guid _trackingNumber;
-        readonly IDictionary<string, string> _variables;
+        readonly IDictionary<string, object> _variables;
 
         public RoutingSlipBuilder(Guid trackingNumber)
         {
             _trackingNumber = trackingNumber;
             _itinerary = new List<Activity>();
             _activityLogs = new List<ActivityLog>();
-            _variables = new Dictionary<string, string>();
+            _variables = new Dictionary<string, object>();
             _activityExceptions = new List<ActivityException>();
         }
 
         public RoutingSlipBuilder(Guid trackingNumber, IEnumerable<Activity> activities,
-            IEnumerable<ActivityLog> activityLogs, IDictionary<string, string> variables,
+            IEnumerable<ActivityLog> activityLogs, IDictionary<string, object> variables,
             IEnumerable<ActivityException> activityExceptions)
         {
             _trackingNumber = trackingNumber;
             _itinerary = activities.ToList();
             _activityLogs = activityLogs.ToList();
-            _variables = variables ?? new Dictionary<string, string>();
+            _variables = variables ?? new Dictionary<string, object>();
             _activityExceptions = activityExceptions.ToList();
         }
 
@@ -102,7 +102,7 @@ namespace MassTransit.Courier
         /// <param name="name">The activity name</param>
         /// <param name="executeAddress">The execution address of the activity</param>
         /// <param name="arguments">A dictionary of name/values matching the activity argument properties</param>
-        public void AddActivity(string name, Uri executeAddress, IDictionary<string, string> arguments)
+        public void AddActivity(string name, Uri executeAddress, IDictionary<string, object> arguments)
         {
             Activity activity = new ActivityImpl(name, executeAddress, arguments);
             _itinerary.Add(activity);
@@ -110,13 +110,13 @@ namespace MassTransit.Courier
 
         public ActivityLog AddActivityLog(string name, Guid activityTrackingNumber, Uri compensateAddress, object logObject)
         {
-            IDictionary<string, string> resultsDictionary = GetObjectAsDictionary(logObject);
+            IDictionary<string, object> resultsDictionary = GetObjectAsDictionary(logObject);
 
             return AddActivityLog(name, activityTrackingNumber, compensateAddress, resultsDictionary);
 
         }
 
-        public ActivityLog AddActivityLog(string name, Guid activityTrackingNumber, Uri compensateAddress, IDictionary<string, string> results)
+        public ActivityLog AddActivityLog(string name, Guid activityTrackingNumber, Uri compensateAddress, IDictionary<string, object> results)
         {
             ActivityLog activityLog = new ActivityLogImpl(activityTrackingNumber, name, compensateAddress, results);
             _activityLogs.Add(activityLog);
@@ -154,23 +154,24 @@ namespace MassTransit.Courier
         /// <param name="values"></param>
         public void SetVariables(object values)
         {
-            IDictionary<string, string> dictionary = GetObjectAsDictionary(values);
+            IDictionary<string, object> dictionary = GetObjectAsDictionary(values);
 
             ApplyDictionaryToVariables(dictionary);
         }
 
 
-        public void SetVariables(IEnumerable<KeyValuePair<string, string>> values)
+        public void SetVariables(IEnumerable<KeyValuePair<string, object>> values)
         {
             ApplyDictionaryToVariables(values);
         }
 
 
-        void ApplyDictionaryToVariables(IEnumerable<KeyValuePair<string, string>> logValues)
+        void ApplyDictionaryToVariables(IEnumerable<KeyValuePair<string, object>> logValues)
         {
             foreach (var logValue in logValues)
             {
-                if (string.IsNullOrEmpty(logValue.Value))
+                if(logValue.Value == null
+                    || (logValue.Value is string && string.IsNullOrEmpty((string)logValue.Value)))
                     _variables.Remove(logValue.Key);
                 else
                     _variables[logValue.Key] = logValue.Value;
@@ -178,11 +179,11 @@ namespace MassTransit.Courier
         }
 
 
-        IDictionary<string, string> GetObjectAsDictionary(object values)
+        IDictionary<string, object> GetObjectAsDictionary(object values)
         {
             IDictionary<string, object> dictionary = Statics.Converter.Convert(values);
 
-            return dictionary.ToDictionary(x => x.Key, x => x.Value != null ? x.Value.ToString() : null);
+            return dictionary.ToDictionary(x => x.Key, x => x.Value);
         }
 
 
@@ -205,7 +206,7 @@ namespace MassTransit.Courier
         class ActivityImpl :
             Activity
         {
-            public ActivityImpl(string name, Uri executeAddress, IDictionary<string, string> arguments)
+            public ActivityImpl(string name, Uri executeAddress, IDictionary<string, object> arguments)
             {
                 Name = name;
                 ExecuteAddress = executeAddress;
@@ -214,7 +215,7 @@ namespace MassTransit.Courier
 
             public string Name { get; private set; }
             public Uri ExecuteAddress { get; private set; }
-            public IDictionary<string, string> Arguments { get; private set; }
+            public IDictionary<string, object> Arguments { get; private set; }
         }
 
 
@@ -222,7 +223,7 @@ namespace MassTransit.Courier
             ActivityLog
         {
             public ActivityLogImpl(Guid activityTrackingNumber, string name, Uri compensateAddress,
-                IDictionary<string, string> results)
+                IDictionary<string, object> results)
             {
                 ActivityTrackingNumber = activityTrackingNumber;
                 Name = name;
@@ -233,7 +234,7 @@ namespace MassTransit.Courier
             public Guid ActivityTrackingNumber { get; private set; }
             public string Name { get; private set; }
             public Uri CompensateAddress { get; private set; }
-            public IDictionary<string, string> Results { get; private set; }
+            public IDictionary<string, object> Results { get; private set; }
         }
 
 

@@ -20,7 +20,7 @@ namespace MassTransit.Courier.InternalMessages
     class RoutingSlipCompletedMessage :
         RoutingSlipCompleted
     {
-        public RoutingSlipCompletedMessage(Guid trackingNumber, IDictionary<string, string> variables)
+        public RoutingSlipCompletedMessage(Guid trackingNumber, IDictionary<string, object> variables)
         {
             Timestamp = DateTime.UtcNow;
 
@@ -30,6 +30,6 @@ namespace MassTransit.Courier.InternalMessages
 
         public Guid TrackingNumber { get; private set; }
         public DateTime Timestamp { get; private set; }
-        public IDictionary<string, string> Variables { get; private set; }
+        public IDictionary<string, object> Variables { get; private set; }
     }
 }

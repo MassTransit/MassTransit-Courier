@@ -22,13 +22,13 @@ namespace MassTransit.Courier.Hosts
         RoutingSlip
     {
         public RoutingSlipImpl(Guid trackingNumber, IEnumerable<Activity> activities,
-            IEnumerable<ActivityLog> activityLogs, IDictionary<string, string> variables,
+            IEnumerable<ActivityLog> activityLogs, IDictionary<string, object> variables,
             IEnumerable<ActivityException> exceptions)
         {
             TrackingNumber = trackingNumber;
             Itinerary = activities.ToList();
             ActivityLogs = activityLogs.ToList();
-            Variables = variables ?? new Dictionary<string, string>();
+            Variables = variables ?? new Dictionary<string, object>();
             ActivityExceptions = exceptions.ToList();
         }
 
@@ -36,7 +36,7 @@ namespace MassTransit.Courier.Hosts
         public IList<Activity> Itinerary { get; private set; }
         public Guid TrackingNumber { get; private set; }
         public IList<ActivityLog> ActivityLogs { get; private set; }
-        public IDictionary<string, string> Variables { get; private set; }
+        public IDictionary<string, object> Variables { get; private set; }
         public IList<ActivityException> ActivityExceptions { get; private set; }
     }
 }

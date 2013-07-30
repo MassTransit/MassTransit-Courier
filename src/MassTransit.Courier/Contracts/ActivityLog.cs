@@ -39,6 +39,6 @@ namespace MassTransit.Courier.Contracts
         /// <summary>
         /// The results of the activity saved for compensation
         /// </summary>
-        IDictionary<string, string> Results { get; }
+        IDictionary<string, object> Results { get; }
     }
 }

@@ -49,7 +49,7 @@ namespace MassTransit.Courier
         /// </summary>
         /// <param name="values">The variables to be updated on the routing slip</param>
         /// <returns></returns>
-        CompensationResult Compensated(IDictionary<string,string> values);
+        CompensationResult Compensated(IDictionary<string, object> values);
 
         /// <summary>
         /// The compensation failed

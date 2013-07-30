@@ -10,18 +10,20 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Courier.Contracts
+namespace MassTransit.Courier.Tests.Testing
 {
-    using System;
-    using System.Collections.Generic;
-
-
-    public interface Activity
+    public class OuterObjectImpl :
+        OuterObject
     {
-        string Name { get; }
+        public OuterObjectImpl(int intValue, string stringValue, decimal decimalValue)
+        {
+            IntValue = intValue;
+            StringValue = stringValue;
+            DecimalValue = decimalValue;
+        }
 
-        Uri ExecuteAddress { get; }
-
-        IDictionary<string, object> Arguments { get; }
+        public int IntValue { get; private set; }
+        public string StringValue { get; private set; }
+        public decimal DecimalValue { get; private set; }
     }
 }
