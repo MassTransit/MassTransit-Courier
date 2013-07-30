@@ -74,15 +74,7 @@
     <Compile Include="ExecuteActivityFactory.cs" />
     <Compile Include="InternalMessages\ExceptionInfoImpl.cs" />
     <Compile Include="Internals\**\*.cs" />
-    <None Include="Serialization\ByteArrayConverter.cs" />
-    <None Include="Serialization\InterfaceProxyConverter.cs" />
-    <None Include="Serialization\JsonContractResolver.cs" />
     <Compile Include="Serialization\JsonExtensions.cs" />
-    <None Include="Serialization\JsonMessageSerializer.cs" />
-    <None Include="Serialization\JsonMessageTypeConverter.cs" />
-    <None Include="Serialization\ListJsonConverter.cs" />
-    <None Include="Serialization\StringDecimalConverter.cs" />
-    <None Include="Serialization\XmlMessageSerializer.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\SolutionVersion.cs">
