@@ -58,7 +58,10 @@ namespace MassTransit.Courier
         public static void Execute(this IServiceBus bus, RoutingSlip routingSlip)
         {
             if (routingSlip.RanToCompletion())
-                bus.Publish(new RoutingSlipCompletedMessage(routingSlip.TrackingNumber, routingSlip.Variables));
+            {
+                bus.Publish<RoutingSlipCompleted>(new RoutingSlipCompletedMessage(routingSlip.TrackingNumber,
+                    DateTime.UtcNow, routingSlip.Variables));
+            }
             else
             {
                 IEndpoint endpoint = bus.GetEndpoint(routingSlip.GetNextExecuteAddress());

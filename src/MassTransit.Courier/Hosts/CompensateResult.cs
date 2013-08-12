@@ -21,31 +21,40 @@ namespace MassTransit.Courier.Hosts
         ExecutionResult
     {
         readonly Activity _activity;
+        readonly Guid _activityTrackingNumber;
+        readonly IServiceBus _bus;
         readonly IConsumeContext _context;
         readonly Exception _exception;
         readonly RoutingSlip _routingSlip;
-        IServiceBus _bus;
+        readonly DateTime _timestamp;
 
         public CompensateResult(IConsumeContext context, RoutingSlip routingSlip, Activity activity,
-            Exception exception)
+            Guid activityTrackingNumber, Exception exception)
         {
+            _timestamp = DateTime.UtcNow;
+
             _context = context;
             _bus = context.Bus;
             _routingSlip = routingSlip;
             _activity = activity;
             _exception = exception;
+            _activityTrackingNumber = activityTrackingNumber;
+        }
+
+        public DateTime Timestamp
+        {
+            get { return _timestamp; }
         }
 
         public void Evaluate()
         {
-            var activityFaultedMessage = new RoutingSlipActivityFaultedMessage(_routingSlip.TrackingNumber,
-                _activity.Name, _exception);
-            _bus.Publish(activityFaultedMessage);
+            var activityFaultedMessage = new RoutingSlipActivityFaultedMessage(_activity.Name,
+                _routingSlip.TrackingNumber, _timestamp, _exception);
+            _bus.Publish<RoutingSlipActivityFaulted>(activityFaultedMessage);
 
             IEndpoint endpoint = _bus.GetEndpoint(_routingSlip.GetNextCompensateAddress());
 
-            RoutingSlip routingSlip = CreateFaultedRoutingSlip(_activity.Name, _bus.Endpoint.Address.Uri,
-                _exception);
+            RoutingSlip routingSlip = CreateFaultedRoutingSlip(_activity.Name, _bus.Endpoint.Address.Uri, _exception);
             endpoint.Forward(_context, routingSlip);
         }
 
@@ -53,7 +62,7 @@ namespace MassTransit.Courier.Hosts
         {
             var builder = new RoutingSlipBuilder(_routingSlip.TrackingNumber, _routingSlip.Itinerary,
                 _routingSlip.ActivityLogs, _routingSlip.Variables, _routingSlip.ActivityExceptions);
-            builder.AddActivityException(activityName, hostAddress, exception);
+            builder.AddActivityException(activityName, hostAddress, _activityTrackingNumber, _timestamp, exception);
 
             return builder.Build();
         }

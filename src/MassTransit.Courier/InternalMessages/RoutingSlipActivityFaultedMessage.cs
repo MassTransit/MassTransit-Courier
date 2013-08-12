@@ -19,9 +19,9 @@ namespace MassTransit.Courier.InternalMessages
     class RoutingSlipActivityFaultedMessage :
         RoutingSlipActivityFaulted
     {
-        public RoutingSlipActivityFaultedMessage(Guid trackingNumber, string activityName, Exception exception)
+        public RoutingSlipActivityFaultedMessage(string activityName, Guid trackingNumber, DateTime timestamp, Exception exception)
         {
-            Timestamp = DateTime.UtcNow;
+            Timestamp = timestamp;
 
             TrackingNumber = trackingNumber;
             ActivityName = activityName;

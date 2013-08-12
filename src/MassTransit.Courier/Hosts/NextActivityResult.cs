@@ -27,10 +27,12 @@ namespace MassTransit.Courier.Hosts
         readonly IConsumeContext _context;
         readonly IDictionary<string, object> _results;
         readonly RoutingSlip _routingSlip;
+        readonly DateTime _timestamp;
 
         public NextActivityResult(IConsumeContext context, RoutingSlip routingSlip, string activityName,
             Guid activityTrackingNumber, IDictionary<string, object> results)
         {
+            _timestamp = DateTime.UtcNow;
             _context = context;
             _routingSlip = routingSlip;
             _activityName = activityName;
@@ -39,10 +41,16 @@ namespace MassTransit.Courier.Hosts
             _bus = context.Bus;
         }
 
+        public DateTime Timestamp
+        {
+            get { return _timestamp; }
+        }
+
         public void Evaluate()
         {
-            _bus.Publish(new RoutingSlipActivityCompletedMessage(_routingSlip.TrackingNumber,
-                _activityTrackingNumber, _activityName, _results, _routingSlip.Variables));
+            _bus.Publish<RoutingSlipActivityCompleted>(
+                new RoutingSlipActivityCompletedMessage(_routingSlip.TrackingNumber, _activityName,
+                    _activityTrackingNumber, _timestamp, _results, _routingSlip.Variables));
 
             IEndpoint endpoint = _bus.GetEndpoint(_routingSlip.GetNextExecuteAddress());
 

@@ -18,7 +18,6 @@ namespace MassTransit.Courier.Hosts
     using Contracts;
     using Extensions;
     using InternalMessages;
-    using Magnum.Reflection;
 
 
     public class HostCompensation<TLog> :
@@ -27,8 +26,8 @@ namespace MassTransit.Courier.Hosts
     {
         readonly ActivityLog _activityLog;
         readonly IConsumeContext<RoutingSlip> _context;
-        readonly SanitizedRoutingSlip _routingSlip;
         readonly TLog _log;
+        readonly SanitizedRoutingSlip _routingSlip;
 
         public HostCompensation(IConsumeContext<RoutingSlip> context)
         {
@@ -100,8 +99,10 @@ namespace MassTransit.Courier.Hosts
 
         void Failed(Exception exception)
         {
-            var message = new CompensationFailedMessage(_routingSlip.TrackingNumber, _activityLog.ActivityTrackingNumber,
-                _activityLog.Name, exception);
+            DateTime timestamp = DateTime.UtcNow;
+
+            var message = new CompensationFailedMessage(_routingSlip.TrackingNumber,
+                _activityLog.Name, _activityLog.ActivityTrackingNumber, timestamp, exception);
 
             _context.Bus.Publish(message);
 
@@ -111,8 +112,11 @@ namespace MassTransit.Courier.Hosts
 
         CompensationResult Compensated(RoutingSlip routingSlip)
         {
-            _context.Bus.Publish(new RoutingSlipActivityCompensatedMessage(_routingSlip.TrackingNumber,
-                _activityLog.ActivityTrackingNumber, _activityLog.Name, _activityLog.Results));
+            DateTime timestamp = DateTime.UtcNow;
+
+            _context.Bus.Publish<RoutingSlipActivityCompensated>(
+                new RoutingSlipActivityCompensatedMessage(_routingSlip.TrackingNumber,
+                    _activityLog.Name, _activityLog.ActivityTrackingNumber, timestamp, _activityLog.Results));
 
             if (routingSlip.IsRunning())
             {
@@ -123,19 +127,10 @@ namespace MassTransit.Courier.Hosts
                 return new CompensatedResult();
             }
 
-            _context.Bus.Publish(new RoutingSlipFaultedMessage(routingSlip.TrackingNumber,
+            _context.Bus.Publish<RoutingSlipFaulted>(new RoutingSlipFaultedMessage(routingSlip.TrackingNumber, timestamp,
                 routingSlip.ActivityExceptions));
 
             return new FaultedResult();
-        }
-
-        static TLog GetActivityLog(ActivityLog activityLog, IEnumerable<KeyValuePair<string, object>> variables)
-        {
-            IDictionary<string, object> initializer = variables.ToDictionary(x => x.Key, x => x.Value);
-            foreach (var argument in activityLog.Results.Where(x => x.Value != null))
-                initializer[argument.Key] = argument.Value;
-
-            return InterfaceImplementationExtensions.InitializeProxy<TLog>(initializer);
         }
 
 

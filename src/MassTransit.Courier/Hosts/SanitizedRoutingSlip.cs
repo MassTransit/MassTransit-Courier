@@ -200,11 +200,15 @@ namespace MassTransit.Courier.Hosts
                 if (activityException.ExceptionInfo == null)
                     throw new SerializationException("An Activity ExceptionInfo is required");
 
+                ActivityTrackingNumber = activityException.ActivityTrackingNumber;
+                Timestamp = activityException.Timestamp;
                 Name = activityException.Name;
                 HostAddress = activityException.HostAddress;
                 ExceptionInfo = activityException.ExceptionInfo;
             }
 
+            public Guid ActivityTrackingNumber { get; private set; }
+            public DateTime Timestamp { get; private set; }
             public string Name { get; private set; }
             public Uri HostAddress { get; private set; }
             public ExceptionInfo ExceptionInfo { get; private set; }

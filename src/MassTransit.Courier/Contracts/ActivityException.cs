@@ -20,6 +20,16 @@ namespace MassTransit.Courier.Contracts
     public interface ActivityException
     {
         /// <summary>
+        /// The tracking number of the activity that threw the exception
+        /// </summary>
+        Guid ActivityTrackingNumber { get; }
+
+        /// <summary>
+        /// The point in time when the exception occurred
+        /// </summary>
+        DateTime Timestamp { get; }
+
+        /// <summary>
         /// The name of the activity that caused the exception
         /// </summary>
         string Name { get; }

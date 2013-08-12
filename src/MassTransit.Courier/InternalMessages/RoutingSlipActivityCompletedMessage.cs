@@ -20,10 +20,10 @@ namespace MassTransit.Courier.InternalMessages
     class RoutingSlipActivityCompletedMessage :
         RoutingSlipActivityCompleted
     {
-        public RoutingSlipActivityCompletedMessage(Guid trackingNumber, Guid activityTrackingNumber, string activityName,
-            IDictionary<string, object> results, IDictionary<string, object> variables)
+        public RoutingSlipActivityCompletedMessage(Guid trackingNumber, string activityName, Guid activityTrackingNumber,
+            DateTime timestamp, IDictionary<string, object> results, IDictionary<string, object> variables)
         {
-            Timestamp = DateTime.UtcNow;
+            Timestamp = timestamp;
 
             TrackingNumber = trackingNumber;
             ActivityTrackingNumber = activityTrackingNumber;

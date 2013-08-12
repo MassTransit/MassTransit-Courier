@@ -20,21 +20,21 @@ namespace MassTransit.Courier.InternalMessages
     class RoutingSlipFaultedMessage :
         RoutingSlipFaulted
     {
-        public RoutingSlipFaultedMessage(Guid trackingNumber, IList<ActivityException> activityExceptions)
+        public RoutingSlipFaultedMessage(Guid trackingNumber, DateTime timestamp,
+            IList<ActivityException> activityExceptions)
         {
-            Timestamp = DateTime.UtcNow;
+            Timestamp = timestamp;
 
             TrackingNumber = trackingNumber;
             ActivityExceptions = activityExceptions;
         }
 
-        public RoutingSlipFaultedMessage(Guid trackingNumber, ActivityException activityException)
+        public RoutingSlipFaultedMessage(Guid trackingNumber, DateTime timestamp, ActivityException activityException)
         {
-            Timestamp = DateTime.UtcNow;
+            Timestamp = timestamp;
 
             TrackingNumber = trackingNumber;
-            ActivityExceptions = new List<ActivityException>();
-            ActivityExceptions.Add(activityException);
+            ActivityExceptions = new List<ActivityException> {activityException};
         }
 
         public Guid TrackingNumber { get; private set; }

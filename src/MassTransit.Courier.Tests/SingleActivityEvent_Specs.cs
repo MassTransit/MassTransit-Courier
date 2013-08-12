@@ -64,6 +64,15 @@ namespace MassTransit.Courier.Tests
         }
 
         [Test]
+        public void Should_have_identical_timestamps_on_the_events()
+        {
+            RoutingSlipCompleted completed = _completed.Task.Result;
+            RoutingSlipActivityCompleted activityCompleted = _activityCompleted.Task.Result;
+
+            Assert.AreEqual(completed.Timestamp, activityCompleted.Timestamp);
+        }
+
+        [Test]
         public void Should_include_the_variable_set_by_the_activity()
         {
             RoutingSlipCompleted completed = _completed.Task.Result;

@@ -111,9 +111,10 @@ namespace MassTransit.Courier.Hosts
         ExecutionResult Faulted(Exception exception)
         {
             if (_routingSlip.IsRunning())
-                return new CompensateResult(_context, _routingSlip, _activity, exception);
+                return new CompensateResult(_context, _routingSlip, _activity, _activityTrackingNumber, exception);
 
-            return new FaultResult(_context.Bus, _routingSlip.TrackingNumber, _activity, exception);
+            return new FaultResult(_context.Bus, _routingSlip.TrackingNumber, _activity, _activityTrackingNumber,
+                exception);
         }
 
         RoutingSlipBuilder CreateRoutingSlipBuilder<TLog>(TLog log, out ActivityLog activityLog)

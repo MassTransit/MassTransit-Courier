@@ -12,8 +12,13 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Courier
 {
+    using System;
+
+
     public interface ExecutionResult
     {
+        DateTime Timestamp { get; }
+
         void Evaluate();
     }
 }

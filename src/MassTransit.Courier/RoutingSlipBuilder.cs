@@ -91,7 +91,7 @@ namespace MassTransit.Courier
         /// <param name="arguments">An anonymous object of properties matching the argument names of the activity</param>
         public void AddActivity(string name, Uri executeAddress, object arguments)
         {
-            var argumentsDictionary = GetObjectAsDictionary(arguments);
+            IDictionary<string, object> argumentsDictionary = GetObjectAsDictionary(arguments);
 
             AddActivity(name, executeAddress, argumentsDictionary);
         }
@@ -108,15 +108,16 @@ namespace MassTransit.Courier
             _itinerary.Add(activity);
         }
 
-        public ActivityLog AddActivityLog(string name, Guid activityTrackingNumber, Uri compensateAddress, object logObject)
+        public ActivityLog AddActivityLog(string name, Guid activityTrackingNumber, Uri compensateAddress,
+            object logObject)
         {
             IDictionary<string, object> resultsDictionary = GetObjectAsDictionary(logObject);
 
             return AddActivityLog(name, activityTrackingNumber, compensateAddress, resultsDictionary);
-
         }
 
-        public ActivityLog AddActivityLog(string name, Guid activityTrackingNumber, Uri compensateAddress, IDictionary<string, object> results)
+        public ActivityLog AddActivityLog(string name, Guid activityTrackingNumber, Uri compensateAddress,
+            IDictionary<string, object> results)
         {
             ActivityLog activityLog = new ActivityLogImpl(activityTrackingNumber, name, compensateAddress, results);
             _activityLogs.Add(activityLog);
@@ -129,11 +130,15 @@ namespace MassTransit.Courier
         /// </summary>
         /// <param name="name">The name of the faulted activity</param>
         /// <param name="hostAddress">The host address where the faulted activity executed</param>
+        /// <param name="timestamp">The timestamp of the exception</param>
         /// <param name="exception">The exception thrown by the activity</param>
+        /// <param name="activityTrackingNumber">The activity tracking number</param>
         /// <returns>The ActivityExceptionInfo that was added</returns>
-        public ActivityException AddActivityException(string name, Uri hostAddress, Exception exception)
+        public ActivityException AddActivityException(string name, Uri hostAddress, Guid activityTrackingNumber,
+            DateTime timestamp, Exception exception)
         {
-            ActivityException activityException = new ActivityExceptionImpl(name, hostAddress, exception);
+            ActivityException activityException = new ActivityExceptionImpl(name, hostAddress, activityTrackingNumber,
+                timestamp, exception);
             _activityExceptions.Add(activityException);
 
             return activityException;
@@ -170,7 +175,7 @@ namespace MassTransit.Courier
         {
             foreach (var logValue in logValues)
             {
-                if(logValue.Value == null
+                if (logValue.Value == null
                     || (logValue.Value is string && string.IsNullOrEmpty((string)logValue.Value)))
                     _variables.Remove(logValue.Key);
                 else
@@ -190,13 +195,18 @@ namespace MassTransit.Courier
         class ActivityExceptionImpl :
             ActivityException
         {
-            public ActivityExceptionImpl(string name, Uri hostAddress, Exception exception)
+            public ActivityExceptionImpl(string name, Uri hostAddress, Guid activityTrackingNumber, DateTime timestamp,
+                Exception exception)
             {
+                ActivityTrackingNumber = activityTrackingNumber;
+                Timestamp = timestamp;
                 Name = name;
                 HostAddress = hostAddress;
                 ExceptionInfo = new ExceptionInfoImpl(exception);
             }
 
+            public Guid ActivityTrackingNumber { get; private set; }
+            public DateTime Timestamp { get; private set; }
             public string Name { get; private set; }
             public Uri HostAddress { get; private set; }
             public ExceptionInfo ExceptionInfo { get; private set; }
