@@ -90,6 +90,7 @@
     <Compile Include="Testing\OuterObjectImpl.cs" />
     <Compile Include="Testing\ReviseItineraryActivity.cs" />
     <Compile Include="Testing\ReviseToEmptyItineraryActivity.cs" />
+    <Compile Include="Testing\ReviseWithNoChangeItineraryActivity.cs" />
     <Compile Include="Testing\SecondTestActivity.cs" />
     <Compile Include="Testing\TestActivity.cs" />
     <Compile Include="Testing\TestArguments.cs" />

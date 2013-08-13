@@ -25,8 +25,99 @@ namespace MassTransit.Courier.Tests
         ActivityTestFixture
     {
         [Test]
+        public void Should_complete_the_additional_item()
+        {
+            var trackingNumber = Guid.NewGuid();
+            var completed = new TaskCompletionSource<RoutingSlipCompleted>();
+            var reviseActivityCompleted = new TaskCompletionSource<RoutingSlipActivityCompleted>();
+            var testActivityCompleted = new TaskCompletionSource<RoutingSlipActivityCompleted>();
+
+            ActivityTestContext testActivity = GetActivityContext<TestActivity>();
+            ActivityTestContext reviseActivity = GetActivityContext<ReviseItineraryActivity>();
+
+            LocalBus.SubscribeHandler<RoutingSlipCompleted>(msg =>
+            {
+                if (msg.TrackingNumber == trackingNumber)
+                    completed.SetResult(msg);
+            });
+            LocalBus.SubscribeHandler<RoutingSlipActivityCompleted>(msg =>
+                {
+                    if (msg.TrackingNumber == trackingNumber)
+                    {
+                        if (msg.ActivityName.Equals(testActivity.Name))
+                            testActivityCompleted.SetResult(msg);
+                        if (msg.ActivityName.Equals(reviseActivity.Name))
+                            reviseActivityCompleted.SetResult(msg);
+                    }
+                });
+
+            Assert.IsTrue(WaitForSubscription<RoutingSlipCompleted>());
+            Assert.IsTrue(WaitForSubscription<RoutingSlipActivityCompleted>());
+
+            var builder = new RoutingSlipBuilder(trackingNumber);
+            builder.AddActivity(reviseActivity.Name, reviseActivity.ExecuteUri, new
+                {
+                    Value = "Time to add a new item!",
+                });
+            LocalBus.Execute(builder.Build());
+
+            Assert.IsTrue(completed.Task.Wait(TestTimeout), "RoutingSlip did not complete");
+            Assert.IsTrue(reviseActivityCompleted.Task.Wait(TestTimeout), "Revise Activity did not complete");
+            Assert.IsTrue(testActivityCompleted.Task.Wait(TestTimeout), "TestActivity did not complete");
+        }
+
+        [Test]
+        public void Should_continue_with_the_source_itinerary()
+        {
+            var trackingNumber = Guid.NewGuid();
+
+            var completed = new TaskCompletionSource<RoutingSlipCompleted>();
+            var reviseActivityCompleted = new TaskCompletionSource<RoutingSlipActivityCompleted>();
+            var testActivityCompleted = new TaskCompletionSource<RoutingSlipActivityCompleted>();
+
+            ActivityTestContext testActivity = GetActivityContext<TestActivity>();
+            ActivityTestContext reviseActivity = GetActivityContext<ReviseWithNoChangeItineraryActivity>();
+
+            LocalBus.SubscribeHandler<RoutingSlipCompleted>(msg =>
+            {
+                if (msg.TrackingNumber == trackingNumber)
+                    completed.SetResult(msg);
+            });
+            LocalBus.SubscribeHandler<RoutingSlipActivityCompleted>(msg =>
+                {
+                    if (msg.TrackingNumber == trackingNumber)
+                    {
+                        if (msg.ActivityName.Equals(testActivity.Name))
+                            testActivityCompleted.SetResult(msg);
+                        if (msg.ActivityName.Equals(reviseActivity.Name))
+                            reviseActivityCompleted.SetResult(msg);
+                    }
+                });
+
+            Assert.IsTrue(WaitForSubscription<RoutingSlipCompleted>());
+            Assert.IsTrue(WaitForSubscription<RoutingSlipActivityCompleted>());
+
+            var builder = new RoutingSlipBuilder(trackingNumber);
+            builder.AddActivity(reviseActivity.Name, reviseActivity.ExecuteUri, new
+                {
+                    Value = "Time to remove any remaining items!",
+                });
+            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new
+                {
+                    Value = "Hello",
+                });
+            LocalBus.Execute(builder.Build());
+
+            Assert.IsTrue(completed.Task.Wait(TestTimeout), "RoutingSlip did not complete");
+            Assert.IsTrue(reviseActivityCompleted.Task.Wait(TestTimeout), "Revise Activity did not complete");
+            Assert.IsTrue(testActivityCompleted.Task.Wait(TestTimeout), "TestActivity did not complete");
+        }
+
+        [Test]
         public void Should_immediately_complete_an_empty_list()
         {
+            Guid trackingNumber = Guid.NewGuid();
+
             var completed = new TaskCompletionSource<RoutingSlipCompleted>();
             var reviseActivityCompleted = new TaskCompletionSource<RoutingSlipActivityCompleted>();
             var testActivityCompleted = new TaskCompletionSource<RoutingSlipActivityCompleted>();
@@ -34,23 +125,30 @@ namespace MassTransit.Courier.Tests
             ActivityTestContext testActivity = GetActivityContext<TestActivity>();
             ActivityTestContext reviseActivity = GetActivityContext<ReviseToEmptyItineraryActivity>();
 
-            LocalBus.SubscribeHandler<RoutingSlipCompleted>(completed.SetResult);
+            LocalBus.SubscribeHandler<RoutingSlipCompleted>(msg =>
+                {
+                    if (msg.TrackingNumber == trackingNumber)
+                        completed.SetResult(msg);
+                });
             LocalBus.SubscribeHandler<RoutingSlipActivityCompleted>(msg =>
                 {
-                    if (msg.ActivityName.Equals(testActivity.Name))
-                        testActivityCompleted.SetResult(msg);
-                    if (msg.ActivityName.Equals(reviseActivity.Name))
-                        reviseActivityCompleted.SetResult(msg);
+                    if (msg.TrackingNumber == trackingNumber)
+                    {
+                        if (msg.ActivityName.Equals(testActivity.Name))
+                            testActivityCompleted.SetResult(msg);
+                        if (msg.ActivityName.Equals(reviseActivity.Name))
+                            reviseActivityCompleted.SetResult(msg);
+                    }
                 });
 
             Assert.IsTrue(WaitForSubscription<RoutingSlipCompleted>());
             Assert.IsTrue(WaitForSubscription<RoutingSlipActivityCompleted>());
 
-            var builder = new RoutingSlipBuilder(Guid.NewGuid());
+            var builder = new RoutingSlipBuilder(trackingNumber);
             builder.AddActivity(reviseActivity.Name, reviseActivity.ExecuteUri, new
-            {
-                Value = "Time to remove any remaining items!",
-            });
+                {
+                    Value = "Time to remove any remaining items!",
+                });
             builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new
                 {
                     Value = "Hello",
@@ -63,50 +161,20 @@ namespace MassTransit.Courier.Tests
             Assert.IsFalse(testActivityCompleted.Task.Wait(3.Seconds()), "Test Activity should not have completed");
         }
 
-        [Test]
-        public void Should_complete_the_additional_item()
-        {
-            var completed = new TaskCompletionSource<RoutingSlipCompleted>();
-            var reviseActivityCompleted = new TaskCompletionSource<RoutingSlipActivityCompleted>();
-            var testActivityCompleted = new TaskCompletionSource<RoutingSlipActivityCompleted>();
-
-            ActivityTestContext testActivity = GetActivityContext<TestActivity>();
-            ActivityTestContext reviseActivity = GetActivityContext<ReviseItineraryActivity>();
-
-            LocalBus.SubscribeHandler<RoutingSlipCompleted>(completed.SetResult);
-            LocalBus.SubscribeHandler<RoutingSlipActivityCompleted>(msg =>
-                {
-                    if (msg.ActivityName.Equals(testActivity.Name))
-                        testActivityCompleted.SetResult(msg);
-                    if (msg.ActivityName.Equals(reviseActivity.Name))
-                        reviseActivityCompleted.SetResult(msg);
-                });
-
-            Assert.IsTrue(WaitForSubscription<RoutingSlipCompleted>());
-            Assert.IsTrue(WaitForSubscription<RoutingSlipActivityCompleted>());
-
-            var builder = new RoutingSlipBuilder(Guid.NewGuid());
-            builder.AddActivity(reviseActivity.Name, reviseActivity.ExecuteUri, new
-            {
-                Value = "Time to add a new item!",
-            });
-            LocalBus.Execute(builder.Build());
-
-            Assert.IsTrue(completed.Task.Wait(TestTimeout), "RoutingSlip did not complete");
-            Assert.IsTrue(reviseActivityCompleted.Task.Wait(TestTimeout), "Revise Activity did not complete");
-            Assert.IsTrue(testActivityCompleted.Task.Wait(3.Seconds()), "TestActivity did not complete");
-        }
-
 
         protected override void SetupActivities()
         {
             AddActivityContext<TestActivity, TestArguments, TestLog>(() => new TestActivity());
             AddActivityContext<ReviseToEmptyItineraryActivity, TestArguments, TestLog>(
                 () => new ReviseToEmptyItineraryActivity());
+            AddActivityContext<ReviseWithNoChangeItineraryActivity, TestArguments, TestLog>(
+                () => new ReviseWithNoChangeItineraryActivity());
 
             ActivityTestContext testActivity = GetActivityContext<TestActivity>();
             AddActivityContext<ReviseItineraryActivity, TestArguments, TestLog>(
-                () => new ReviseItineraryActivity(x => x.AddActivity(testActivity.Name, testActivity.ExecuteUri, new { Value = "Added"})));
+                () =>
+                new ReviseItineraryActivity(
+                    x => x.AddActivity(testActivity.Name, testActivity.ExecuteUri, new {Value = "Added"})));
         }
     }
 }
