@@ -75,6 +75,7 @@
     <Compile Include="ObjectGraph_Specs.cs" />
     <Compile Include="RanToCompletion_Specs.cs" />
     <Compile Include="EndpointCacheProxy.cs" />
+    <Compile Include="ReviseItinerary_Specs.cs" />
     <Compile Include="SingleActivityEvent_Specs.cs" />
     <Compile Include="Testing\FaultyActivity.cs" />
     <Compile Include="Testing\FaultyArguments.cs" />
@@ -87,6 +88,8 @@
     <Compile Include="Testing\ObjectGraphTestActivity.cs" />
     <Compile Include="Testing\OuterObject.cs" />
     <Compile Include="Testing\OuterObjectImpl.cs" />
+    <Compile Include="Testing\ReviseItineraryActivity.cs" />
+    <Compile Include="Testing\ReviseToEmptyItineraryActivity.cs" />
     <Compile Include="Testing\SecondTestActivity.cs" />
     <Compile Include="Testing\TestActivity.cs" />
     <Compile Include="Testing\TestArguments.cs" />

@@ -25,13 +25,15 @@ namespace MassTransit.Courier
     /// A RoutingSlipBuilder is used to create a routing slip with proper validation that the resulting RoutingSlip
     /// is valid.
     /// </summary>
-    public class RoutingSlipBuilder
+    public class RoutingSlipBuilder :
+        ItineraryBuilder
     {
         public static readonly IDictionary<string, object> NoArguments = new Dictionary<string, object>();
         readonly IList<ActivityException> _activityExceptions;
 
         readonly IList<ActivityLog> _activityLogs;
         readonly IList<Activity> _itinerary;
+        readonly List<Activity> _sourceItinerary;
         readonly Guid _trackingNumber;
         readonly IDictionary<string, object> _variables;
 
@@ -39,6 +41,7 @@ namespace MassTransit.Courier
         {
             _trackingNumber = trackingNumber;
             _itinerary = new List<Activity>();
+            _sourceItinerary = new List<Activity>();
             _activityLogs = new List<ActivityLog>();
             _variables = new Dictionary<string, object>();
             _activityExceptions = new List<ActivityException>();
@@ -50,6 +53,7 @@ namespace MassTransit.Courier
         {
             _trackingNumber = trackingNumber;
             _itinerary = activities.ToList();
+            _sourceItinerary = new List<Activity>();
             _activityLogs = activityLogs.ToList();
             _variables = variables ?? new Dictionary<string, object>();
             _activityExceptions = activityExceptions.ToList();
@@ -61,15 +65,6 @@ namespace MassTransit.Courier
         public Guid TrackingNumber
         {
             get { return _trackingNumber; }
-        }
-
-        /// <summary>
-        /// Builds the routing slip using the current state of the builder
-        /// </summary>
-        /// <returns>The RoutingSlip</returns>
-        public RoutingSlip Build()
-        {
-            return new RoutingSlipImpl(TrackingNumber, _itinerary, _activityLogs, _variables, _activityExceptions);
         }
 
         /// <summary>
@@ -108,6 +103,62 @@ namespace MassTransit.Courier
             _itinerary.Add(activity);
         }
 
+        public void AddVariable(string key, string value)
+        {
+            _variables.Add(key, value);
+        }
+
+
+        /// <summary>
+        /// Sets the value of any existing variables to the value in the anonymous object,
+        /// as well as adding any additional variables that did not exist previously.
+        /// 
+        /// For example, SetVariables(new { IntValue = 27, StringValue = "Hello, World." });
+        /// </summary>
+        /// <param name="values"></param>
+        public void SetVariables(object values)
+        {
+            IDictionary<string, object> dictionary = GetObjectAsDictionary(values);
+
+            ApplyDictionaryToVariables(dictionary);
+        }
+
+
+        public void SetVariables(IEnumerable<KeyValuePair<string, object>> values)
+        {
+            ApplyDictionaryToVariables(values);
+        }
+
+        public int AddSourceItinerary()
+        {
+            int count = _sourceItinerary.Count;
+
+            foreach (Activity activity in _sourceItinerary)
+                _itinerary.Add(activity);
+            _sourceItinerary.Clear();
+
+            return count;
+        }
+
+        /// <summary>
+        /// Builds the routing slip using the current state of the builder
+        /// </summary>
+        /// <returns>The RoutingSlip</returns>
+        public RoutingSlip Build()
+        {
+            return new RoutingSlipImpl(TrackingNumber, _itinerary, _activityLogs, _variables, _activityExceptions);
+        }
+
+        /// <summary>
+        /// Specify the source itinerary for this routing slip builder
+        /// </summary>
+        /// <param name="sourceItinerary"></param>
+        public void SetSourceItinerary(IEnumerable<Activity> sourceItinerary)
+        {
+            _sourceItinerary.Clear();
+            _sourceItinerary.AddRange(sourceItinerary);
+        }
+
         public ActivityLog AddActivityLog(string name, Guid activityTrackingNumber, Uri compensateAddress,
             object logObject)
         {
@@ -142,32 +193,6 @@ namespace MassTransit.Courier
             _activityExceptions.Add(activityException);
 
             return activityException;
-        }
-
-        public void AddVariable(string key, string value)
-        {
-            _variables.Add(key, value);
-        }
-
-
-        /// <summary>
-        /// Sets the value of any existing variables to the value in the anonymous object,
-        /// as well as adding any additional variables that did not exist previously.
-        /// 
-        /// For example, SetVariables(new { IntValue = 27, StringValue = "Hello, World." });
-        /// </summary>
-        /// <param name="values"></param>
-        public void SetVariables(object values)
-        {
-            IDictionary<string, object> dictionary = GetObjectAsDictionary(values);
-
-            ApplyDictionaryToVariables(dictionary);
-        }
-
-
-        public void SetVariables(IEnumerable<KeyValuePair<string, object>> values)
-        {
-            ApplyDictionaryToVariables(values);
         }
 
 

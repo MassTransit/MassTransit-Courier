@@ -79,22 +79,64 @@ namespace MassTransit.Courier.Hosts
             return Complete(builder.Build(), activityLog.Results);
         }
 
-        ExecutionResult Execution<TArguments>.Completed<TLog>(TLog log, object values)
+        ExecutionResult Execution<TArguments>.Completed<TLog>(TLog log, object variables)
         {
             ActivityLog activityLog;
             RoutingSlipBuilder builder = CreateRoutingSlipBuilder(log, out activityLog);
-            builder.SetVariables(values);
+            builder.SetVariables(variables);
 
             return Complete(builder.Build(), activityLog.Results);
         }
 
-        ExecutionResult Execution<TArguments>.Completed<TLog>(TLog log, IDictionary<string, object> values)
+        ExecutionResult Execution<TArguments>.Completed<TLog>(TLog log,
+            IEnumerable<KeyValuePair<string, object>> variables)
         {
             ActivityLog activityLog;
             RoutingSlipBuilder builder = CreateRoutingSlipBuilder(log, out activityLog);
-            builder.SetVariables(values);
+            builder.SetVariables(variables);
 
             return Complete(builder.Build(), activityLog.Results);
+        }
+
+        public ExecutionResult ReviseItinerary(Action<ItineraryBuilder> itineraryBuilder)
+        {
+            RoutingSlipBuilder builder = CreateReviseRoutingSlipBuilder();
+
+            return ReviseItinerary(builder, RoutingSlipBuilder.NoArguments, itineraryBuilder);
+        }
+
+        public ExecutionResult ReviseItinerary<TLog>(TLog log, Action<ItineraryBuilder> itineraryBuilder)
+            where TLog : class
+        {
+            RoutingSlipBuilder builder = CreateReviseRoutingSlipBuilder();
+            ActivityLog activityLog = builder.AddActivityLog(_activity.Name, _activityTrackingNumber,
+                _compensationAddress, log);
+
+            return ReviseItinerary(builder, activityLog.Results, itineraryBuilder);
+        }
+
+        public ExecutionResult ReviseItinerary<TLog>(TLog log, object variables,
+            Action<ItineraryBuilder> buildItinerary)
+            where TLog : class
+        {
+            RoutingSlipBuilder builder = CreateReviseRoutingSlipBuilder();
+            ActivityLog activityLog = builder.AddActivityLog(_activity.Name, _activityTrackingNumber,
+                _compensationAddress, log);
+            builder.SetVariables(variables);
+
+            return ReviseItinerary(builder, activityLog.Results, buildItinerary);
+        }
+
+        public ExecutionResult ReviseItinerary<TLog>(TLog log, IEnumerable<KeyValuePair<string, object>> variables,
+            Action<ItineraryBuilder> buildItinerary)
+            where TLog : class
+        {
+            RoutingSlipBuilder builder = CreateReviseRoutingSlipBuilder();
+            ActivityLog activityLog = builder.AddActivityLog(_activity.Name, _activityTrackingNumber,
+                _compensationAddress, log);
+            builder.SetVariables(variables);
+
+            return ReviseItinerary(builder, activityLog.Results, buildItinerary);
         }
 
         ExecutionResult Execution<TArguments>.Faulted()
@@ -107,6 +149,11 @@ namespace MassTransit.Courier.Hosts
             return Faulted(exception);
         }
 
+        RoutingSlipBuilder CreateReviseRoutingSlipBuilder()
+        {
+            return new RoutingSlipBuilder(_routingSlip.TrackingNumber, Enumerable.Empty<Activity>(),
+                _routingSlip.ActivityLogs, _routingSlip.Variables, _routingSlip.ActivityExceptions);
+        }
 
         ExecutionResult Faulted(Exception exception)
         {
@@ -134,6 +181,24 @@ namespace MassTransit.Courier.Hosts
 
         ExecutionResult Complete(RoutingSlip routingSlip, IDictionary<string, object> results)
         {
+            if (routingSlip.RanToCompletion())
+            {
+                return new RanToCompletionResult(_context.Bus, routingSlip, _activity.Name, _activityTrackingNumber,
+                    results);
+            }
+
+            return new NextActivityResult(_context, routingSlip, _activity.Name, _activityTrackingNumber, results);
+        }
+
+        ExecutionResult ReviseItinerary(RoutingSlipBuilder builder, IDictionary<string, object> results,
+            Action<ItineraryBuilder> buildItinerary)
+        {
+            builder.SetSourceItinerary(_routingSlip.Itinerary.Skip(1));
+
+            buildItinerary(builder);
+
+            RoutingSlip routingSlip = builder.Build();
+
             if (routingSlip.RanToCompletion())
             {
                 return new RanToCompletionResult(_context.Bus, routingSlip, _activity.Name, _activityTrackingNumber,

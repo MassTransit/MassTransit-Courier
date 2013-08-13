@@ -74,6 +74,7 @@
     <Compile Include="ExecuteActivityFactory.cs" />
     <Compile Include="InternalMessages\ExceptionInfoImpl.cs" />
     <Compile Include="Internals\**\*.cs" />
+    <Compile Include="ItineraryBuilder.cs" />
     <Compile Include="Serialization\JsonExtensions.cs" />
   </ItemGroup>
   <ItemGroup>

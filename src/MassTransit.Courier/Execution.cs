@@ -57,9 +57,9 @@ namespace MassTransit.Courier
         /// </summary>
         /// <typeparam name="TLog"></typeparam>
         /// <param name="log"></param>
-        /// <param name="values">An anonymous object of values to add/set as variables on the routing slip</param>
+        /// <param name="variables">An anonymous object of values to add/set as variables on the routing slip</param>
         /// <returns></returns>
-        ExecutionResult Completed<TLog>(TLog log, object values)
+        ExecutionResult Completed<TLog>(TLog log, object variables)
             where TLog : class;
 
         /// <summary>
@@ -68,10 +68,22 @@ namespace MassTransit.Courier
         /// </summary>
         /// <typeparam name="TLog"></typeparam>
         /// <param name="log"></param>
-        /// <param name="values">An dictionary of values to add/set as variables on the routing slip</param>
+        /// <param name="variables">An dictionary of values to add/set as variables on the routing slip</param>
         /// <returns></returns>
-        ExecutionResult Completed<TLog>(TLog log, IDictionary<string, object> values)
+        ExecutionResult Completed<TLog>(TLog log, IEnumerable<KeyValuePair<string, object>> variables)
             where TLog : class;
+
+        ExecutionResult ReviseItinerary(Action<ItineraryBuilder> itineraryBuilder);
+
+        ExecutionResult ReviseItinerary<TLog>(TLog log, Action<ItineraryBuilder> itineraryBuilder)
+            where TLog : class;
+
+        ExecutionResult ReviseItinerary<TLog>(TLog log, object variables, Action<ItineraryBuilder> buildItinerary)
+            where TLog : class;
+
+        ExecutionResult ReviseItinerary<TLog>(TLog log, IEnumerable<KeyValuePair<string,object>> variables, Action<ItineraryBuilder> buildItinerary)
+            where TLog : class;
+
 
         /// <summary>
         /// The activity Faulted for an unknown reason, but compensation should be triggered
