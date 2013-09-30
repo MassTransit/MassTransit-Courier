@@ -13,7 +13,6 @@
 namespace MassTransit.Courier.Contracts
 {
     using System;
-    using System.Collections.Generic;
 
 
     /// <summary>
@@ -34,6 +33,6 @@ namespace MassTransit.Courier.Contracts
         /// <summary>
         /// The exception information from the faulting activities
         /// </summary>
-        IList<ActivityException> ActivityExceptions { get; }
+        ActivityException[] ActivityExceptions { get; }
     }
 }

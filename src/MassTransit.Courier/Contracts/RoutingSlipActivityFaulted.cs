@@ -33,6 +33,11 @@ namespace MassTransit.Courier.Contracts
         string ActivityName { get; }
 
         /// <summary>
+        /// The tracking number of this activity execution
+        /// </summary>
+        Guid ActivityTrackingNumber { get; }
+
+        /// <summary>
         /// The exception information from the faulting activity
         /// </summary>
         ExceptionInfo ExceptionInfo { get; }

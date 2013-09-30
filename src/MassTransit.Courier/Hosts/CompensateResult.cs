@@ -48,8 +48,7 @@ namespace MassTransit.Courier.Hosts
 
         public void Evaluate()
         {
-            var activityFaultedMessage = new RoutingSlipActivityFaultedMessage(_activity.Name,
-                _routingSlip.TrackingNumber, _timestamp, _exception);
+            var activityFaultedMessage = new RoutingSlipActivityFaultedMessage(_routingSlip.TrackingNumber, _timestamp, _activity.Name, _activityTrackingNumber, _exception);
             _bus.Publish<RoutingSlipActivityFaulted>(activityFaultedMessage);
 
             IEndpoint endpoint = _bus.GetEndpoint(_routingSlip.GetNextCompensateAddress());
