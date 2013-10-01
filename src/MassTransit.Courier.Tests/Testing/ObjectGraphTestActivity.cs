@@ -19,8 +19,8 @@ namespace MassTransit.Courier.Tests.Testing
         Activity<ObjectGraphActivityArguments, TestLog>
     {
         readonly decimal _decimalValue;
-        readonly string[] _names;
         readonly int _intValue;
+        readonly string[] _names;
         readonly string _stringValue;
 
         public ObjectGraphTestActivity(int intValue, string stringValue, decimal decimalValue, string[] names)

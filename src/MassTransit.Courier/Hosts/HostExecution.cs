@@ -71,6 +71,22 @@ namespace MassTransit.Courier.Hosts
             return Complete(builder.Build(), RoutingSlipBuilder.NoArguments);
         }
 
+        ExecutionResult Execution<TArguments>.CompletedWithoutLog(IEnumerable<KeyValuePair<string, object>> variables)
+        {
+            RoutingSlipBuilder builder = CreateRoutingSlipBuilder();
+            builder.SetVariables(variables);
+
+            return Complete(builder.Build(), RoutingSlipBuilder.NoArguments);
+        }
+
+        ExecutionResult Execution<TArguments>.CompletedWithoutLog(object variables)
+        {
+            RoutingSlipBuilder builder = CreateRoutingSlipBuilder();
+            builder.SetVariables(variables);
+
+            return Complete(builder.Build(), RoutingSlipBuilder.NoArguments);
+        }
+
         ExecutionResult Execution<TArguments>.Completed<TLog>(TLog log)
         {
             ActivityLog activityLog;
@@ -108,6 +124,9 @@ namespace MassTransit.Courier.Hosts
         public ExecutionResult ReviseItinerary<TLog>(TLog log, Action<ItineraryBuilder> itineraryBuilder)
             where TLog : class
         {
+            if (_compensationAddress == null)
+                throw new RoutingSlipException("The activity does not have a compensation address");
+
             RoutingSlipBuilder builder = CreateReviseRoutingSlipBuilder();
             ActivityLog activityLog = builder.AddActivityLog(_activity.Name, _activityTrackingNumber,
                 _compensationAddress, log);
@@ -119,6 +138,9 @@ namespace MassTransit.Courier.Hosts
             Action<ItineraryBuilder> buildItinerary)
             where TLog : class
         {
+            if (_compensationAddress == null)
+                throw new RoutingSlipException("The activity does not have a compensation address");
+
             RoutingSlipBuilder builder = CreateReviseRoutingSlipBuilder();
             ActivityLog activityLog = builder.AddActivityLog(_activity.Name, _activityTrackingNumber,
                 _compensationAddress, log);
@@ -131,6 +153,9 @@ namespace MassTransit.Courier.Hosts
             Action<ItineraryBuilder> buildItinerary)
             where TLog : class
         {
+            if (_compensationAddress == null)
+                throw new RoutingSlipException("The activity does not have a compensation address");
+
             RoutingSlipBuilder builder = CreateReviseRoutingSlipBuilder();
             ActivityLog activityLog = builder.AddActivityLog(_activity.Name, _activityTrackingNumber,
                 _compensationAddress, log);
@@ -167,6 +192,9 @@ namespace MassTransit.Courier.Hosts
         RoutingSlipBuilder CreateRoutingSlipBuilder<TLog>(TLog log, out ActivityLog activityLog)
             where TLog : class
         {
+            if (_compensationAddress == null)
+                throw new RoutingSlipException("The activity does not have a compensation address");
+
             RoutingSlipBuilder builder = CreateRoutingSlipBuilder();
             activityLog = builder.AddActivityLog(_activity.Name, _activityTrackingNumber, _compensationAddress, log);
 

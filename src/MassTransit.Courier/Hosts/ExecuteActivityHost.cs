@@ -37,6 +37,14 @@ namespace MassTransit.Courier.Hosts
             _activityFactory = activityFactory;
         }
 
+        public ExecuteActivityHost(ExecuteActivityFactory<TArguments> activityFactory)
+        {
+            if (activityFactory == null)
+                throw new ArgumentNullException("activityFactory");
+
+            _activityFactory = activityFactory;
+        }
+
         void Consumes<IConsumeContext<RoutingSlip>>.All.Consume(IConsumeContext<RoutingSlip> context)
         {
             Execution<TArguments> execution = new HostExecution<TArguments>(context, _compensateAddress);

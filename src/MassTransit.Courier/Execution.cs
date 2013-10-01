@@ -43,6 +43,20 @@ namespace MassTransit.Courier
         ExecutionResult Completed();
 
         /// <summary>
+        /// Completes the execution, passing updated variables to the routing slip
+        /// </summary>
+        /// <param name="variables"></param>
+        /// <returns></returns>
+        ExecutionResult CompletedWithoutLog(IEnumerable<KeyValuePair<string, object>> variables);
+
+        /// <summary>
+        /// Completes the execution, passing updated variables to the routing slip
+        /// </summary>
+        /// <param name="variables"></param>
+        /// <returns></returns>
+        ExecutionResult CompletedWithoutLog(object variables);
+
+        /// <summary>
         /// Completes the activity, passing a compensation log entry
         /// </summary>
         /// <typeparam name="TLog"></typeparam>
