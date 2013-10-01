@@ -19,7 +19,6 @@ namespace MassTransit.Courier.Hosts
     using System.Runtime.Serialization;
     using Context;
     using Contracts;
-    using Magnum.Reflection;
     using MassTransit.Serialization;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
@@ -29,15 +28,12 @@ namespace MassTransit.Courier.Hosts
     public class SanitizedRoutingSlip :
         RoutingSlip
     {
-        readonly IConsumeContext<RoutingSlip> _context;
         readonly IConsumeContext<RoutingSlip> _jsonContext;
         readonly JToken _messageToken;
         readonly JToken _variablesToken;
 
         public SanitizedRoutingSlip(IConsumeContext<RoutingSlip> context)
         {
-            _context = context;
-
             using (var ms = new MemoryStream())
             {
                 context.BaseContext.CopyBodyTo(ms);
@@ -66,31 +62,19 @@ namespace MassTransit.Courier.Hosts
 
             _variablesToken = _messageToken["variables"];
 
-            Variables = routingSlip.Variables ?? JsonConvert.DeserializeObject<IDictionary<string, object>>("{}");
+            Variables = routingSlip.Variables ?? GetEmptyObject();
 
-            if (routingSlip.Itinerary == null)
-                Itinerary = new List<Activity>();
-            else
-                Itinerary = routingSlip.Itinerary.Select(x => (Activity)new SanitizedActivity(x, Variables)).ToList();
+            Itinerary = (routingSlip.Itinerary ?? new List<Activity>())
+                .Select(x => (Activity)new SanitizedActivity(x))
+                .ToList();
 
-            if (routingSlip.ActivityLogs == null)
-                ActivityLogs = new List<ActivityLog>();
-            else
-            {
-                ActivityLogs =
-                    routingSlip.ActivityLogs.Select(x => (ActivityLog)new SanitizedActivityLog(x, Variables)).ToList();
-            }
+            ActivityLogs = (routingSlip.ActivityLogs ?? new List<ActivityLog>())
+                .Select(x => (ActivityLog)new SanitizedActivityLog(x))
+                .ToList();
 
-            if (routingSlip.ActivityExceptions == null)
-                ActivityExceptions = new List<ActivityException>();
-            else
-            {
-                ActivityExceptions = routingSlip.ActivityExceptions
-                                                .Select(x => (ActivityException)new SanitizedActivityException(x))
-                                                .ToList();
-            }
-
-            ActivityExceptions = routingSlip.ActivityExceptions ?? new List<ActivityException>();
+            ActivityExceptions = (routingSlip.ActivityExceptions ?? new List<ActivityException>())
+                .Select(x => (ActivityException)new SanitizedActivityException(x))
+                .ToList();
         }
 
 
@@ -166,11 +150,16 @@ namespace MassTransit.Courier.Hosts
             throw new InvalidOperationException("Unable to reprocess message as RoutingSlip");
         }
 
+        static IDictionary<string, object> GetEmptyObject()
+        {
+            return JsonConvert.DeserializeObject<IDictionary<string, object>>("{}");
+        }
+
 
         class SanitizedActivity :
             Activity
         {
-            public SanitizedActivity(Activity activity, IDictionary<string, object> variables)
+            public SanitizedActivity(Activity activity)
             {
                 if (string.IsNullOrEmpty(activity.Name))
                     throw new SerializationException("An Activity Name is required");
@@ -179,7 +168,7 @@ namespace MassTransit.Courier.Hosts
 
                 Name = activity.Name;
                 ExecuteAddress = activity.ExecuteAddress;
-                Arguments = activity.Arguments ?? JsonConvert.DeserializeObject<IDictionary<string, object>>("{}");
+                Arguments = activity.Arguments ?? GetEmptyObject();
             }
 
             public string Name { get; private set; }
@@ -204,6 +193,9 @@ namespace MassTransit.Courier.Hosts
                 Timestamp = activityException.Timestamp;
                 Name = activityException.Name;
                 HostAddress = activityException.HostAddress;
+                MachineName = activityException.MachineName;
+                ProcessId = activityException.ProcessId;
+                ProcessName = activityException.ProcessName;
                 ExceptionInfo = activityException.ExceptionInfo;
             }
 
@@ -211,6 +203,9 @@ namespace MassTransit.Courier.Hosts
             public DateTime Timestamp { get; private set; }
             public string Name { get; private set; }
             public Uri HostAddress { get; private set; }
+            public string MachineName { get; private set; }
+            public int ProcessId { get; private set; }
+            public string ProcessName { get; private set; }
             public ExceptionInfo ExceptionInfo { get; private set; }
         }
 
@@ -218,7 +213,7 @@ namespace MassTransit.Courier.Hosts
         class SanitizedActivityLog :
             ActivityLog
         {
-            public SanitizedActivityLog(ActivityLog activityLog, IDictionary<string, object> variables)
+            public SanitizedActivityLog(ActivityLog activityLog)
             {
                 if (string.IsNullOrEmpty(activityLog.Name))
                     throw new SerializationException("An ActivityLog Name is required");
@@ -228,7 +223,7 @@ namespace MassTransit.Courier.Hosts
                 ActivityTrackingNumber = activityLog.ActivityTrackingNumber;
                 Name = activityLog.Name;
                 CompensateAddress = activityLog.CompensateAddress;
-                Results = activityLog.Results ?? JsonConvert.DeserializeObject<IDictionary<string, object>>("{}");
+                Results = activityLog.Results ?? GetEmptyObject();
             }
 
             public Guid ActivityTrackingNumber { get; private set; }

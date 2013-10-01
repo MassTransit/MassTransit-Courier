@@ -39,7 +39,7 @@
         {
             _collection = Database.GetCollection<RoutingSlipDocument>(EventCollectionName);
             _trackingNumber = NewId.NextGuid();
-            EventPersister persister = new UpsertEventPersister(_collection);
+            EventPersister persister = new RoutingSlipEventPersister(_collection);
 
             Console.WriteLine("Tracking Number: {0}", _trackingNumber);
 

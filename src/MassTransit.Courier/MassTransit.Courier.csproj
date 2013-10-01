@@ -72,7 +72,11 @@
     <Compile Include="ActivityFactory.cs" />
     <Compile Include="CompensateActivityFactory.cs" />
     <Compile Include="ExecuteActivityFactory.cs" />
+    <Compile Include="InternalMessages\ActivityExceptionImpl.cs" />
+    <Compile Include="InternalMessages\ActivityImpl.cs" />
+    <Compile Include="InternalMessages\ActivityLogImpl.cs" />
     <Compile Include="InternalMessages\ExceptionInfoImpl.cs" />
+    <Compile Include="InternalMessages\RoutingSlipImpl.cs" />
     <Compile Include="Internals\**\*.cs" />
     <Compile Include="ItineraryBuilder.cs" />
     <Compile Include="Serialization\JsonExtensions.cs" />
@@ -100,7 +104,6 @@
     <Compile Include="Hosts\ExecuteActivityHost.cs" />
     <Compile Include="Hosts\HostCompensation.cs" />
     <Compile Include="Hosts\HostExecution.cs" />
-    <Compile Include="Hosts\RoutingSlipImpl.cs" />
     <Compile Include="Hosts\SanitizedRoutingSlip.cs" />
     <Compile Include="InternalMessages\CompensationFailedMessage.cs" />
     <Compile Include="InternalMessages\RoutingSlipActivityCompensatedMessage.cs" />

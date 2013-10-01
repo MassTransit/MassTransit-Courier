@@ -22,6 +22,9 @@ namespace MassTransit.Courier.MongoDbIntegration.Documents
         {
             ActivityTrackingNumber = activityException.ActivityTrackingNumber;
             HostAddress = activityException.HostAddress;
+            MachineName = activityException.MachineName;
+            ProcessId = activityException.ProcessId;
+            ProcessName = activityException.ProcessName;
             ActivityName = activityException.Name;
             Timestamp = activityException.Timestamp;
 
@@ -29,9 +32,12 @@ namespace MassTransit.Courier.MongoDbIntegration.Documents
                 ExceptionInfo = new ExceptionInfoDocument(activityException.ExceptionInfo);
         }
 
+        public string ActivityName { get; private set; }
         public Guid ActivityTrackingNumber { get; private set; }
         public Uri HostAddress { get; private set; }
-        public string ActivityName { get; private set; }
+        public string MachineName { get; private set; }
+        public string ProcessName { get; private set; }
+        public int ProcessId { get; private set; }
         public DateTime Timestamp { get; private set; }
         public ExceptionInfoDocument ExceptionInfo { get; private set; }
     }

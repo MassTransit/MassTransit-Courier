@@ -10,26 +10,25 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Courier.Contracts
+namespace MassTransit.Courier.InternalMessages
 {
     using System;
+    using System.Collections.Generic;
+    using Contracts;
 
 
-    public interface RoutingSlipCompensationFailed
+    class ActivityImpl :
+        Activity
     {
-        /// <summary>
-        /// The tracking number of the routing slip that faulted
-        /// </summary>
-        Guid TrackingNumber { get; }
+        public ActivityImpl(string name, Uri executeAddress, IDictionary<string, object> arguments)
+        {
+            Name = name;
+            ExecuteAddress = executeAddress;
+            Arguments = arguments;
+        }
 
-        /// <summary>
-        /// The date/time when the routing slip compensation was finished
-        /// </summary>
-        DateTime Timestamp { get; }
-
-        /// <summary>
-        /// The exception information from the faulting activity
-        /// </summary>
-        ExceptionInfo ExceptionInfo { get; }
+        public string Name { get; private set; }
+        public Uri ExecuteAddress { get; private set; }
+        public IDictionary<string, object> Arguments { get; private set; }
     }
 }

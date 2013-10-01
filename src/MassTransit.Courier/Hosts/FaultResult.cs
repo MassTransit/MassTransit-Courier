@@ -45,7 +45,8 @@ namespace MassTransit.Courier.Hosts
 
         public void Evaluate()
         {
-            var activityFaulted = new RoutingSlipActivityFaultedMessage(_trackingNumber, _timestamp, _activity.Name, _activityTrackingNumber, _exception);
+            var activityFaulted = new RoutingSlipActivityFaultedMessage(_trackingNumber, _timestamp, _activity.Name,
+                _activityTrackingNumber, _exception);
             _bus.Publish<RoutingSlipActivityFaulted>(activityFaulted);
 
             var activityExceptionInfo = new ActivityExceptionImpl(_activity.Name, _bus.Endpoint.Address.Uri,
@@ -53,27 +54,6 @@ namespace MassTransit.Courier.Hosts
 
             var routingSlipFaulted = new RoutingSlipFaultedMessage(_trackingNumber, _timestamp, activityExceptionInfo);
             _bus.Publish<RoutingSlipFaulted>(routingSlipFaulted);
-        }
-
-
-        class ActivityExceptionImpl :
-            ActivityException
-        {
-            public ActivityExceptionImpl(string name, Uri hostAddress, Guid activityTrackingNumber, DateTime timestamp,
-                Exception exception)
-            {
-                Timestamp = timestamp;
-                ActivityTrackingNumber = activityTrackingNumber;
-                Name = name;
-                HostAddress = hostAddress;
-                ExceptionInfo = new ExceptionInfoImpl(exception);
-            }
-
-            public Guid ActivityTrackingNumber { get; private set; }
-            public DateTime Timestamp { get; private set; }
-            public string Name { get; private set; }
-            public Uri HostAddress { get; private set; }
-            public ExceptionInfo ExceptionInfo { get; private set; }
         }
     }
 }

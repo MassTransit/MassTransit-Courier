@@ -41,23 +41,5 @@ namespace MassTransit.Courier.Contracts
         /// The exception information from the faulting activity
         /// </summary>
         ExceptionInfo ExceptionInfo { get; }
-
-        /// <summary>
-        /// The exception source
-        /// </summary>
-        [Obsolete("Consider using the new ExceptionInfo property instead")]
-        string Source { get; }
-
-        /// <summary>
-        /// The exception message
-        /// </summary>
-        [Obsolete("Consider using the new ExceptionInfo property instead")]
-        string Message { get; }
-
-        /// <summary>
-        /// The exception stack trace
-        /// </summary>
-        [Obsolete("Consider using the new ExceptionInfo property instead")]
-        string StackTrace { get; }
     }
 }

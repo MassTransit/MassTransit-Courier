@@ -17,7 +17,7 @@ namespace MassTransit.Courier.MongoDbIntegration.Tests.Events
     using Contracts;
 
 
-    public class RoutingSlipActivityCompletedEvent :
+    class RoutingSlipActivityCompletedEvent :
         RoutingSlipActivityCompleted
     {
         public RoutingSlipActivityCompletedEvent(Guid trackingNumber, string activityName,

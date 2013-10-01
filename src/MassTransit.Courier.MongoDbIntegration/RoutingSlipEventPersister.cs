@@ -21,14 +21,14 @@ namespace MassTransit.Courier.MongoDbIntegration
     using MongoDB.Driver.Builders;
 
 
-    public class UpsertEventPersister :
+    public class RoutingSlipEventPersister :
         EventPersister
     {
         static readonly ILog _log = Logger.Get<RoutingSlipCompletedConsumer>();
 
         readonly MongoCollection _collection;
 
-        public UpsertEventPersister(MongoCollection collection)
+        public RoutingSlipEventPersister(MongoCollection collection)
         {
             _collection = collection;
         }

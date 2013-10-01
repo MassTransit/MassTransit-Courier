@@ -217,62 +217,6 @@ namespace MassTransit.Courier
         }
 
 
-        class ActivityExceptionImpl :
-            ActivityException
-        {
-            public ActivityExceptionImpl(string name, Uri hostAddress, Guid activityTrackingNumber, DateTime timestamp,
-                Exception exception)
-            {
-                ActivityTrackingNumber = activityTrackingNumber;
-                Timestamp = timestamp;
-                Name = name;
-                HostAddress = hostAddress;
-                ExceptionInfo = new ExceptionInfoImpl(exception);
-            }
-
-            public Guid ActivityTrackingNumber { get; private set; }
-            public DateTime Timestamp { get; private set; }
-            public string Name { get; private set; }
-            public Uri HostAddress { get; private set; }
-            public ExceptionInfo ExceptionInfo { get; private set; }
-        }
-
-
-        class ActivityImpl :
-            Activity
-        {
-            public ActivityImpl(string name, Uri executeAddress, IDictionary<string, object> arguments)
-            {
-                Name = name;
-                ExecuteAddress = executeAddress;
-                Arguments = arguments;
-            }
-
-            public string Name { get; private set; }
-            public Uri ExecuteAddress { get; private set; }
-            public IDictionary<string, object> Arguments { get; private set; }
-        }
-
-
-        class ActivityLogImpl :
-            ActivityLog
-        {
-            public ActivityLogImpl(Guid activityTrackingNumber, string name, Uri compensateAddress,
-                IDictionary<string, object> results)
-            {
-                ActivityTrackingNumber = activityTrackingNumber;
-                Name = name;
-                CompensateAddress = compensateAddress;
-                Results = results;
-            }
-
-            public Guid ActivityTrackingNumber { get; private set; }
-            public string Name { get; private set; }
-            public Uri CompensateAddress { get; private set; }
-            public IDictionary<string, object> Results { get; private set; }
-        }
-
-
         static class Statics
         {
             internal static readonly AnonymousObjectDictionaryConverter Converter =

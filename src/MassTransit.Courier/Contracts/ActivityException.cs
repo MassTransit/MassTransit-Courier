@@ -40,6 +40,21 @@ namespace MassTransit.Courier.Contracts
         Uri HostAddress { get; }
 
         /// <summary>
+        /// The machine name where the activity exception occurred
+        /// </summary>
+        string MachineName { get; }
+
+        /// <summary>
+        /// The process-id of the faulting activity
+        /// </summary>
+        int ProcessId { get; }
+
+        /// <summary>
+        /// The process name where the activity was hosted
+        /// </summary>
+        string ProcessName { get; }
+
+        /// <summary>
         /// The exception details
         /// </summary>
         ExceptionInfo ExceptionInfo { get; }

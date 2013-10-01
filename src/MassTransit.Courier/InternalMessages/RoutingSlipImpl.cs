@@ -10,7 +10,7 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
-namespace MassTransit.Courier.Hosts
+namespace MassTransit.Courier.InternalMessages
 {
     using System;
     using System.Collections.Generic;
@@ -18,7 +18,7 @@ namespace MassTransit.Courier.Hosts
     using Contracts;
 
 
-    public class RoutingSlipImpl :
+    class RoutingSlipImpl :
         RoutingSlip
     {
         public RoutingSlipImpl(Guid trackingNumber, IEnumerable<Activity> activities,
