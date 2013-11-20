@@ -93,14 +93,14 @@ end
 
 desc "Runs unit tests"
 nunit :tests35 => [:build35] do |nunit|
-          nunit.command = File.join('src', 'packages','NUnit.Runners.2.6.2', 'tools', 'nunit-console.exe')
+          nunit.command = File.join('src', 'packages','NUnit.Runners.2.6.3', 'tools', 'nunit-console.exe')
           nunit.options = "/framework=#{CLR_TOOLS_VERSION}", '/nothread', '/exclude:Integration', '/nologo', '/labels', "\"/xml=#{File.join(props[:artifacts], 'nunit-test-results-net-3.5.xml')}\""
           nunit.assemblies = FileList[File.join(props[:src], "MassTransit.Courier.Tests/bin/Release", "MassTransit.Courier.Tests.dll")]
 end
 
 desc "Runs unit tests"
 nunit :tests4 => [:build4] do |nunit|
-          nunit.command = File.join('src', 'packages','NUnit.Runners.2.6.2', 'tools', 'nunit-console.exe')
+          nunit.command = File.join('src', 'packages','NUnit.Runners.2.6.3', 'tools', 'nunit-console.exe')
           nunit.options = "/framework=#{CLR_TOOLS_VERSION}", '/nothread', '/exclude:Integration', '/nologo', '/labels', "\"/xml=#{File.join(props[:artifacts], 'nunit-test-results-net-4.0.xml')}\""
           nunit.assemblies = FileList[File.join(props[:src], "MassTransit.Courier.Tests/bin/Release", "MassTransit.Courier.Tests.dll")]
 end
@@ -160,9 +160,9 @@ nuspec :create_nuspec do |nuspec|
   nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
   nuspec.requireLicenseAcceptance = "false"
   nuspec.iconUrl = 'https://a248.e.akamai.net/camo.github.com/72cb54409c345c49a1a2cda30498dfc78895f476/687474703a2f2f7777772e70686174626f79672e636f6d2f6d742d6c6f676f2e706e67'
-  nuspec.dependency "Magnum", "2.1.0"
-  nuspec.dependency "MassTransit", "2.8.0"
-  nuspec.dependency "Newtonsoft.Json", "5.0.6"
+  nuspec.dependency "Magnum", "2.1.1"
+  nuspec.dependency "MassTransit", "2.9.0"
+  nuspec.dependency "Newtonsoft.Json", "5.0.8"
   nuspec.output_file = File.join(props[:artifacts], 'MassTransit.Courier.nuspec')
   add_files File.join(props[:output]), 'MassTransit.Courier.{dll,pdb,xml}', nuspec
   nuspec.file(File.join(props[:src], "MassTransit.Courier\\**\\*.cs").gsub("/","\\"), "src")
@@ -180,10 +180,10 @@ nuspec :create_nuspec do |nuspec|
   nuspec.licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0"
   nuspec.requireLicenseAcceptance = "false"
   nuspec.iconUrl = 'https://a248.e.akamai.net/camo.github.com/72cb54409c345c49a1a2cda30498dfc78895f476/687474703a2f2f7777772e70686174626f79672e636f6d2f6d742d6c6f676f2e706e67'
-  nuspec.dependency "Magnum", "2.1.0"
-  nuspec.dependency "MassTransit", "2.8.0"
+  nuspec.dependency "Magnum", "2.1.1"
+  nuspec.dependency "MassTransit", "2.9.0"
   nuspec.dependency "MassTransit.Courier", NUGET_VERSION
-  nuspec.dependency "mongocsharpdriver", "1.8.2"
+  nuspec.dependency "mongocsharpdriver", "1.8.3"
   nuspec.output_file = File.join(props[:artifacts], 'MassTransit.Courier.MongoDbIntegration.nuspec')
   add_files File.join(props[:output]), 'MassTransit.Courier.MongoDbIntegration.{dll,pdb,xml}', nuspec
   nuspec.file(File.join(props[:src], "MassTransit.Courier.MongoDbIntegration\\**\\*.cs").gsub("/","\\"), "src")
