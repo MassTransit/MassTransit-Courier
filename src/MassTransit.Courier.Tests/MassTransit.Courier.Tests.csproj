@@ -35,9 +35,9 @@
     <NoWarn>3001,3002,3003,3024</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="log4net, Version=1.2.12.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+    <Reference Include="log4net, Version=1.2.13.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\log4net.2.0.2\lib\net40-full\log4net.dll</HintPath>
+      <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Magnum, Version=2.1.1.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -45,11 +45,11 @@
     </Reference>
     <Reference Include="MassTransit, Version=2.9.0.0, Culture=neutral, PublicKeyToken=b8e0e9f2f1e657fa, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\MassTransit.2.9.0\lib\net40\MassTransit.dll</HintPath>
+      <HintPath>..\packages\MassTransit.2.9.1\lib\net40\MassTransit.dll</HintPath>
     </Reference>
     <Reference Include="MassTransit.Log4NetIntegration, Version=2.9.0.0, Culture=neutral, PublicKeyToken=b8e0e9f2f1e657fa, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\MassTransit.Log4Net.2.9.0\lib\net40\MassTransit.Log4NetIntegration.dll</HintPath>
+      <HintPath>..\packages\MassTransit.Log4Net.2.9.1\lib\net40\MassTransit.Log4NetIntegration.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
