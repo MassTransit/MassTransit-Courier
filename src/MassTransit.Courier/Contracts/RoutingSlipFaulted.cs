@@ -13,6 +13,7 @@
 namespace MassTransit.Courier.Contracts
 {
     using System;
+    using System.Collections.Generic;
 
 
     /// <summary>
@@ -34,5 +35,12 @@ namespace MassTransit.Courier.Contracts
         /// The exception information from the faulting activities
         /// </summary>
         ActivityException[] ActivityExceptions { get; }
+
+        /// <summary>
+        /// The variables that were present once the routing slip completed, can be used
+        /// to capture the output of the slip - real events should likely be used for real
+        /// completion items but this is useful for some cases
+        /// </summary>
+        IDictionary<string, object> Variables { get; }
     }
 }

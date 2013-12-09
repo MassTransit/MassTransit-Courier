@@ -22,11 +22,12 @@ namespace MassTransit.Courier.InternalMessages
         RoutingSlipFaulted
     {
         public RoutingSlipFaultedMessage(Guid trackingNumber, DateTime timestamp,
-            IEnumerable<ActivityException> activityExceptions)
+            IEnumerable<ActivityException> activityExceptions, IDictionary<string, object> variables)
         {
+            TrackingNumber = trackingNumber;
             Timestamp = timestamp;
 
-            TrackingNumber = trackingNumber;
+            Variables = variables;
             ActivityExceptions = activityExceptions.ToArray();
         }
 
@@ -41,5 +42,6 @@ namespace MassTransit.Courier.InternalMessages
         public Guid TrackingNumber { get; private set; }
         public DateTime Timestamp { get; private set; }
         public ActivityException[] ActivityExceptions { get; private set; }
+        public IDictionary<string, object> Variables { get; private set; }
     }
 }

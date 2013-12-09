@@ -186,7 +186,7 @@ namespace MassTransit.Courier.Hosts
                 return new CompensateResult(_context, _routingSlip, _activity, _activityTrackingNumber, exception);
 
             return new FaultResult(_context.Bus, _routingSlip.TrackingNumber, _activity, _activityTrackingNumber,
-                exception);
+                exception, _routingSlip.Variables);
         }
 
         RoutingSlipBuilder CreateRoutingSlipBuilder<TLog>(TLog log, out ActivityLog activityLog)

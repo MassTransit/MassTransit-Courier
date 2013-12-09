@@ -102,7 +102,7 @@ namespace MassTransit.Courier.Hosts
             DateTime timestamp = DateTime.UtcNow;
 
             var message = new CompensationFailedMessage(_routingSlip.TrackingNumber,
-                _activityLog.Name, _activityLog.ActivityTrackingNumber, timestamp, exception);
+                _activityLog.Name, _activityLog.ActivityTrackingNumber, timestamp, exception, _activityLog.Results, _routingSlip.Variables);
 
             _context.Bus.Publish(message);
 
@@ -116,7 +116,7 @@ namespace MassTransit.Courier.Hosts
 
             _context.Bus.Publish<RoutingSlipActivityCompensated>(
                 new RoutingSlipActivityCompensatedMessage(_routingSlip.TrackingNumber,
-                    _activityLog.Name, _activityLog.ActivityTrackingNumber, timestamp, _activityLog.Results));
+                    _activityLog.Name, _activityLog.ActivityTrackingNumber, timestamp, _activityLog.Results, _routingSlip.Variables));
 
             if (routingSlip.IsRunning())
             {
@@ -128,7 +128,7 @@ namespace MassTransit.Courier.Hosts
             }
 
             _context.Bus.Publish<RoutingSlipFaulted>(new RoutingSlipFaultedMessage(routingSlip.TrackingNumber, timestamp,
-                routingSlip.ActivityExceptions));
+                routingSlip.ActivityExceptions, routingSlip.Variables));
 
             return new FaultedResult();
         }

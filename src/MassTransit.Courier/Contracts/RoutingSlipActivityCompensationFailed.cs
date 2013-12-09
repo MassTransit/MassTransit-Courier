@@ -13,6 +13,7 @@
 namespace MassTransit.Courier.Contracts
 {
     using System;
+    using System.Collections.Generic;
 
 
     public interface RoutingSlipActivityCompensationFailed
@@ -36,6 +37,18 @@ namespace MassTransit.Courier.Contracts
         /// The name of the activity that failed to compensate
         /// </summary>
         string ActivityName { get; }
+
+        /// <summary>
+        /// The results of the activity saved for compensation
+        /// </summary>
+        IDictionary<string, object> Results { get; }
+
+        /// <summary>
+        /// The variables that were present once the routing slip completed, can be used
+        /// to capture the output of the slip - real events should likely be used for real
+        /// completion items but this is useful for some cases
+        /// </summary>
+        IDictionary<string, object> Variables { get; }
 
         /// <summary>
         /// The exception information from the faulting activity

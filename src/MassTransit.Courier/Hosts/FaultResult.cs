@@ -13,6 +13,7 @@
 namespace MassTransit.Courier.Hosts
 {
     using System;
+    using System.Collections.Generic;
     using Contracts;
     using InternalMessages;
 
@@ -26,9 +27,10 @@ namespace MassTransit.Courier.Hosts
         readonly Exception _exception;
         readonly DateTime _timestamp;
         readonly Guid _trackingNumber;
+        readonly IDictionary<string, object> _variables;
 
         public FaultResult(IServiceBus bus, Guid trackingNumber, Activity activity, Guid activityTrackingNumber,
-            Exception exception)
+            Exception exception, IDictionary<string, object> variables)
         {
             _timestamp = DateTime.UtcNow;
             _bus = bus;
@@ -36,6 +38,7 @@ namespace MassTransit.Courier.Hosts
             _activity = activity;
             _activityTrackingNumber = activityTrackingNumber;
             _exception = exception;
+            _variables = variables;
         }
 
         public DateTime Timestamp
@@ -46,7 +49,7 @@ namespace MassTransit.Courier.Hosts
         public void Evaluate()
         {
             var activityFaulted = new RoutingSlipActivityFaultedMessage(_trackingNumber, _timestamp, _activity.Name,
-                _activityTrackingNumber, _exception);
+                _activityTrackingNumber, _exception, _variables, _activity.Arguments);
             _bus.Publish<RoutingSlipActivityFaulted>(activityFaulted);
 
             var activityExceptionInfo = new ActivityExceptionImpl(_activity.Name, _bus.Endpoint.Address.Uri,

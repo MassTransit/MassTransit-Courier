@@ -13,6 +13,7 @@
 namespace MassTransit.Courier.InternalMessages
 {
     using System;
+    using System.Collections.Generic;
     using Contracts;
 
 
@@ -21,7 +22,7 @@ namespace MassTransit.Courier.InternalMessages
         RoutingSlipCompensationFailed
     {
         public CompensationFailedMessage(Guid trackingNumber, string activityName, Guid activityTrackingNumber,
-            DateTime timestamp, Exception exception)
+            DateTime timestamp, Exception exception, IDictionary<string, object> results, IDictionary<string, object> variables)
         {
             Timestamp = timestamp;
 
@@ -31,7 +32,8 @@ namespace MassTransit.Courier.InternalMessages
             Source = exception.Source;
             Message = exception.Message;
             StackTrace = exception.StackTrace;
-
+            Results = results;
+            Variables = variables;
             ExceptionInfo = new ExceptionInfoImpl(exception);
         }
 
@@ -40,9 +42,11 @@ namespace MassTransit.Courier.InternalMessages
 
         public Guid ActivityTrackingNumber { get; private set; }
         public string ActivityName { get; private set; }
+        public IDictionary<string, object> Results { get; private set; }
         public string Source { get; private set; }
         public string Message { get; private set; }
         public string StackTrace { get; private set; }
         public ExceptionInfo ExceptionInfo { get; private set; }
+        public IDictionary<string, object> Variables { get; set; }
     }
 }
