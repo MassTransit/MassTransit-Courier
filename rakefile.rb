@@ -161,7 +161,7 @@ nuspec :create_nuspec do |nuspec|
   nuspec.requireLicenseAcceptance = "false"
   nuspec.iconUrl = 'https://a248.e.akamai.net/camo.github.com/72cb54409c345c49a1a2cda30498dfc78895f476/687474703a2f2f7777772e70686174626f79672e636f6d2f6d742d6c6f676f2e706e67'
   nuspec.dependency "Magnum", "2.1.1"
-  nuspec.dependency "MassTransit", "2.9.1"
+  nuspec.dependency "MassTransit", "2.9.2"
   nuspec.dependency "Newtonsoft.Json", "5.0.8"
   nuspec.output_file = File.join(props[:artifacts], 'MassTransit.Courier.nuspec')
   add_files File.join(props[:output]), 'MassTransit.Courier.{dll,pdb,xml}', nuspec
@@ -181,7 +181,7 @@ nuspec :create_nuspec do |nuspec|
   nuspec.requireLicenseAcceptance = "false"
   nuspec.iconUrl = 'https://a248.e.akamai.net/camo.github.com/72cb54409c345c49a1a2cda30498dfc78895f476/687474703a2f2f7777772e70686174626f79672e636f6d2f6d742d6c6f676f2e706e67'
   nuspec.dependency "Magnum", "2.1.1"
-  nuspec.dependency "MassTransit", "2.9.1"
+  nuspec.dependency "MassTransit", "2.9.2"
   nuspec.dependency "MassTransit.Courier", NUGET_VERSION
   nuspec.dependency "mongocsharpdriver", "1.8.3"
   nuspec.output_file = File.join(props[:artifacts], 'MassTransit.Courier.MongoDbIntegration.nuspec')
