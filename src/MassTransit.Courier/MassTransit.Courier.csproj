@@ -81,6 +81,7 @@
     <Compile Include="InternalMessages\RoutingSlipImpl.cs" />
     <Compile Include="Internals\**\*.cs" />
     <Compile Include="ItineraryBuilder.cs" />
+    <Compile Include="RoutingSlipEventExtensions.cs" />
     <Compile Include="Serialization\JsonExtensions.cs" />
   </ItemGroup>
   <ItemGroup>

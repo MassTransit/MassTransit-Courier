@@ -212,10 +212,11 @@ namespace MassTransit.Courier.Hosts
             if (routingSlip.RanToCompletion())
             {
                 return new RanToCompletionResult(_context.Bus, routingSlip, _activity.Name, _activityTrackingNumber,
-                    results);
+                    results, _activity.Arguments);
             }
 
-            return new NextActivityResult(_context, routingSlip, _activity.Name, _activityTrackingNumber, results);
+            return new NextActivityResult(_context, routingSlip, _activity.Name, _activityTrackingNumber, results,
+                _activity.Arguments);
         }
 
         ExecutionResult ReviseItinerary(RoutingSlipBuilder builder, IDictionary<string, object> results,
@@ -230,10 +231,11 @@ namespace MassTransit.Courier.Hosts
             if (routingSlip.RanToCompletion())
             {
                 return new RanToCompletionResult(_context.Bus, routingSlip, _activity.Name, _activityTrackingNumber,
-                    results);
+                    results, _activity.Arguments);
             }
 
-            return new NextActivityResult(_context, routingSlip, _activity.Name, _activityTrackingNumber, results);
+            return new NextActivityResult(_context, routingSlip, _activity.Name, _activityTrackingNumber, results,
+                _activity.Arguments);
         }
     }
 }

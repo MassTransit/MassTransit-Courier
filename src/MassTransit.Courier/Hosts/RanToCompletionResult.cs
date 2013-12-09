@@ -25,17 +25,18 @@ namespace MassTransit.Courier.Hosts
         readonly Guid _activityTrackingNumber;
         readonly IServiceBus _bus;
         readonly IDictionary<string, object> _results;
+        readonly IDictionary<string, object> _arguments;
         readonly RoutingSlip _routingSlip;
         readonly DateTime _timestamp;
 
-        public RanToCompletionResult(IServiceBus bus, RoutingSlip routingSlip, string activityName,
-            Guid activityTrackingNumber, IDictionary<string, object> results)
+        public RanToCompletionResult(IServiceBus bus, RoutingSlip routingSlip, string activityName, Guid activityTrackingNumber, IDictionary<string, object> results, IDictionary<string, object> arguments)
         {
             _timestamp = DateTime.UtcNow;
             _routingSlip = routingSlip;
             _activityName = activityName;
             _activityTrackingNumber = activityTrackingNumber;
             _results = results;
+            _arguments = arguments;
             _bus = bus;
         }
 
@@ -48,7 +49,7 @@ namespace MassTransit.Courier.Hosts
         {
             _bus.Publish<RoutingSlipActivityCompleted>(
                 new RoutingSlipActivityCompletedMessage(_routingSlip.TrackingNumber, _activityName,
-                    _activityTrackingNumber, _timestamp, _results, _routingSlip.Variables));
+                    _activityTrackingNumber, _timestamp, _results, _routingSlip.Variables, _arguments));
 
             _bus.Publish<RoutingSlipCompleted>(new RoutingSlipCompletedMessage(_routingSlip.TrackingNumber, _timestamp,
                 _routingSlip.Variables));

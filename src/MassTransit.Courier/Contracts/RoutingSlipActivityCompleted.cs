@@ -39,6 +39,11 @@ namespace MassTransit.Courier.Contracts
         string ActivityName { get; }
 
         /// <summary>
+        /// The arguments that were specified for the activity
+        /// </summary>
+        IDictionary<string, object> Arguments { get; }
+
+        /// <summary>
         /// The results saved as the ActivityLog by the Activity
         /// </summary>
         IDictionary<string, object> Results { get; }

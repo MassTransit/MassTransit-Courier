@@ -32,6 +32,14 @@ namespace MassTransit.Courier.Tests
         }
 
         [Test]
+        public void Should_be_able_to_get_variable_as_string()
+        {
+            RoutingSlipActivityCompleted activityCompleted = _activityCompleted.Task.Result;
+
+            Assert.AreEqual("Knife", activityCompleted.GetVariable<string>("Variable"));
+        }
+
+        [Test]
         public void Should_include_the_activity_log_data()
         {
             RoutingSlipActivityCompleted activityCompleted = _activityCompleted.Task.Result;
