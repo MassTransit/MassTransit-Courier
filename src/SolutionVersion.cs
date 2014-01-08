@@ -4,10 +4,10 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("A MassTransit Routing Slip pattern implementation")]
 [assembly: AssemblyProduct("MassTransit.Courier")]
 [assembly: AssemblyCopyright("Copyright 2013 Chris Patterson")]
-[assembly: AssemblyVersion("2.9.1")]
-[assembly: AssemblyFileVersion("2.9.1")]
+[assembly: AssemblyVersion("2.9.3")]
+[assembly: AssemblyFileVersion("2.9.3")]
 
-[assembly: AssemblyInformationalVersion("2.9.1.aaca55")]
+[assembly: AssemblyInformationalVersion("2.9.3.c17eb7")]
 [assembly: ComVisibleAttribute(false)]
 [assembly: CLSCompliantAttribute(true)]
 
