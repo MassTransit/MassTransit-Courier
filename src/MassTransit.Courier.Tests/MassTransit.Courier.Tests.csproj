@@ -45,7 +45,7 @@
     </Reference>
     <Reference Include="MassTransit, Version=2.9.0.0, Culture=neutral, PublicKeyToken=b8e0e9f2f1e657fa, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\MassTransit.2.9.9lib\net40\MassTransit.dll</HintPath>
+      <HintPath>..\packages\MassTransit.2.9.9\lib\net40\MassTransit.dll</HintPath>
     </Reference>
     <Reference Include="MassTransit.Log4NetIntegration, Version=2.9.0.0, Culture=neutral, PublicKeyToken=b8e0e9f2f1e657fa, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
