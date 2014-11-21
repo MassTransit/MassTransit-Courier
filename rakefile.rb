@@ -90,8 +90,9 @@ task :package => [:nuget, :zip_output]
 
 desc "ZIPs up the build results."
 zip :zip_output => [:versioning] do |zip|
-  zip.dirs = [props[:output]]
-  zip.output_path = File.join(props[:artifacts], "MassTransit.Courier-#{NUGET_VERSION}.zip")
+  zip.directories_to_zip = [props[:output]]
+  zip.output_file = "MassTransit.Courier-#{NUGET_VERSION}.zip"
+  zip.output_path = props[:artifacts]
 end
 
 desc "restores missing packages"
